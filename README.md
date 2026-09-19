@@ -4,7 +4,7 @@ CareerOS is a full-stack job search operating system for managing applications, 
 
 ## Overview
 
-A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture** only.
+A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture** and **CODEX-002: Core Domain & PostgreSQL Data Architecture**.
 
 ## Product Vision
 
@@ -12,9 +12,9 @@ Connect opportunities, application progress, career documents and actionable ins
 
 ## Current Status
 
-**Implemented:** responsive application shell, honest empty Overview, disabled future navigation, typed API client, ASP.NET API host, structured request logging, error handling, health checks, EF Core/PostgreSQL and Redis connectivity, development infrastructure, tests and CI.
+**Implemented:** responsive application shell, honest empty Overview, disabled future navigation, typed API client, ASP.NET API host, structured request logging, error handling, health checks, EF Core/PostgreSQL and Redis connectivity, 17 domain/persistence entities, an initial PostgreSQL schema migration, ownership constraints, auditable timestamps, optimistic concurrency, development infrastructure, tests and CI.
 
-**Planned:** authentication, profiles, companies, jobs, applications, Kanban, resumes, parsing, explainable matching, skill gaps, interviews, tasks, documents, notifications, analytics and AI assistance. No product records, authentication or database tables exist yet. The shell is a visual preview, not an authenticated session.
+**Planned:** authentication and server-scoped queries, product APIs/UI for profiles, companies, jobs, applications, resumes, skills, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and AI assistance. Domain entities and database tables now exist, but no product endpoints, uploads, delivery or user workflows are exposed. The shell remains a visual preview, not an authenticated session. No records are seeded automatically.
 
 ## Technology Stack
 
@@ -27,7 +27,7 @@ Connect opportunities, application progress, career documents and actionable ins
 
 ## Architecture
 
-One monorepo, two independently runnable applications. The backend uses pragmatic Clean Architecture: Domain ← Application ← Infrastructure, composed by Api. No repository wrapper, mediator, product scaffolding or shared JavaScript package is added without a concrete need. See [architecture](docs/architecture.md).
+One monorepo, two independently runnable applications. The backend uses pragmatic Clean Architecture: Domain ← Application ← Infrastructure, composed by Api. No repository wrapper, mediator or shared JavaScript package is added without a concrete need. See [architecture](docs/architecture.md) and the [database model](docs/database.md).
 
 ## Repository Structure
 
@@ -93,7 +93,7 @@ The shell uses semantic navigation, focus indicators, a skip link and a native m
 
 `dotnet run --project apps/api/src/CareerOS.Api`. Development OpenAPI JSON is at `/swagger/v1/swagger.json` and Swagger UI at `/swagger`. `/health/live` checks the running host; `/health` actually probes PostgreSQL and Redis and returns 503 if unavailable. Neither endpoint exposes connection strings or exception details. `X-Correlation-ID` is validated and returned with responses, and appears in structured JSON logs and ProblemDetails.
 
-Future HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. No empty product endpoints or migrations are manufactured. See the migration workflow in [development](docs/development.md).
+Future HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema` migration defines the real relational model. Apply it explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
 
 ## Testing
 
@@ -102,7 +102,7 @@ npm test
 dotnet test apps/api/CareerOS.sln
 ```
 
-The default backend suite tests real HTTP pipeline behavior in-process and intentionally unavailable dependencies. Set `RUN_CONTAINER_TESTS=true` with Docker running to enable the separate real PostgreSQL Testcontainers test; otherwise it is visibly skipped. CI enables it and fails if containers cannot run.
+The default backend suite tests domain invariants, real HTTP pipeline behavior in-process and intentionally unavailable dependencies. Set `RUN_CONTAINER_TESTS=true` with Docker running to enable real PostgreSQL migration/constraint/concurrency tests; otherwise they are visibly skipped. CI enables them and fails if containers cannot run. A disposable PostgreSQL server can also be supplied through `CAREEROS_TEST_POSTGRES`; see [development](docs/development.md).
 
 ## CI
 
@@ -110,11 +110,12 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 
 ## Roadmap
 
-1. CODEX-001 — foundation (this phase).
-2. Authentication and ownership design, with a supported-runtime upgrade before production.
-3. First real vertical slice: companies, opportunities and application tracking.
-4. Documents, resumes, interviews and follow-ups.
-5. Explainable matching, analytics and career intelligence.
+1. CODEX-001 — foundation (complete).
+2. CODEX-002 — core domain and PostgreSQL schema (complete).
+3. CODEX-003 — authentication and server-enforced ownership, with a supported-runtime upgrade before production.
+4. First real vertical slices: companies, opportunities and application tracking.
+5. Document/resume workflows, interviews and follow-ups.
+6. Explainable matching, analytics and career intelligence.
 
 ## License
 

@@ -1,5 +1,7 @@
 # CODEX-001 verification
 
+This is the historical foundation-phase record. For the current schema phase, see [CODEX-002 verification](verification-codex002.md).
+
 Verified locally on Windows with Node 24.14.0, npm 11.9.0, .NET SDK 8.0.425 and Docker CLI 29.8.0 on September 20, 2026.
 
 ## Results

@@ -63,18 +63,20 @@ dotnet build apps/api/CareerOS.sln --configuration Release --no-restore
 dotnet test apps/api/CareerOS.sln --configuration Release --no-build
 ```
 
-EF tools are local and versioned in `.config/dotnet-tools.json`. After introducing the first real domain mapping, create and inspect a migration:
+EF tools are local and versioned in `.config/dotnet-tools.json`. CODEX-002 includes the generated `InitialDomainSchema` migration. With the database configured and running, apply it explicitly:
 
 ```sh
-dotnet ef migrations add InitialDomain --project apps/api/src/CareerOS.Infrastructure --startup-project apps/api/src/CareerOS.Api --output-dir Persistence/Migrations
 dotnet ef database update --project apps/api/src/CareerOS.Infrastructure --startup-project apps/api/src/CareerOS.Api
+dotnet ef migrations has-pending-model-changes --project apps/api/src/CareerOS.Infrastructure --startup-project apps/api/src/CareerOS.Api
 ```
 
-For these commands, explicitly set `ASPNETCORE_ENVIRONMENT=Development` to use user-secrets, or supply connection strings through environment variables. No database is created or migrated during host startup. Do not use `EnsureCreated` alongside migrations. No empty baseline migration is included because the model has no tables.
+For these commands, explicitly set `ASPNETCORE_ENVIRONMENT=Development` to use user-secrets, or supply connection strings through environment variables. No database is created or migrated during host startup. Do not use `EnsureCreated` alongside migrations. For future schema changes use `dotnet ef migrations add <DescriptiveName> --project apps/api/src/CareerOS.Infrastructure --startup-project apps/api/src/CareerOS.Api --output-dir Persistence/Migrations`, then review the generated migration and snapshot. Generate a deployment script with `dotnet ef migrations script --idempotent` using the same project flags. Never edit an already deployed migration in place.
+
+The real database tests cover rollback to migration 0 and reapplication in disposable databases. Rolling this schema back deletes its data; do not run rollback against a working user database as routine troubleshooting. See [database architecture](database.md) for schema, constraints and retention decisions.
 
 ## Testing
 
-Frontend tests use Vitest/jsdom and Testing Library. Backend unit tests validate request identifiers; in-process integration tests verify actual middleware and honest unavailable-dependency statuses without requiring Docker.
+Frontend tests use Vitest/jsdom and Testing Library. Backend unit tests validate request identifiers and important domain invariants; in-process integration tests verify actual middleware and honest unavailable-dependency statuses without requiring Docker.
 
 For real PostgreSQL integration coverage, enable Docker explicitly:
 
@@ -87,7 +89,9 @@ dotnet test apps/api/CareerOS.sln
 RUN_CONTAINER_TESTS=true dotnet test apps/api/CareerOS.sln
 ```
 
-Testcontainers creates and disposes its own database container with dynamic credentials/ports. It does not use the development volume. A stopped engine is a failure when opted in; otherwise the test is explicitly skipped. CI opts in on Linux runners.
+Testcontainers creates and disposes its own database container with dynamic credentials/ports. Each test creates and removes a separate randomly named database inside that server. It does not use the development volume. A stopped engine is a failure when opted in; otherwise the PostgreSQL tests are explicitly skipped. CI opts in on Linux runners and runs the complete schema suite.
+
+If Docker is unavailable, set `CAREEROS_TEST_POSTGRES` to the connection string for a separately provisioned **disposable PostgreSQL 17 server**, with a role permitted to create databases. This enables the same tests without changing them; the fixture creates/drops only its own `careeros_test_<uuid>` databases. Do not use production credentials or a production server. Keep this connection string in the process environment, never source control. CI continues to use Testcontainers by default.
 
 ## Docker workflow
 
@@ -121,4 +125,4 @@ Commit npm and NuGet lockfiles. To intentionally update NuGet resolution, restor
 - **API URL missing:** set `apps/web/.env.local` and restart/rebuild Next.js.
 - **Restore blocked by network:** allow registry.npmjs.org and api.nuget.org, then retry; do not suppress restore errors.
 
-No production deployment, authentication, personal-data persistence or product workflows are included in this phase.
+No production deployment, authentication or product workflows are included in this phase. Personal-data schema exists, but server authorization must be implemented before exposing it through APIs.
