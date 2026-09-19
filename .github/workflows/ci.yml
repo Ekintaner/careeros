@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RUN_CONTAINER_TESTS: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet restore apps/api/CareerOS.sln --locked-mode
+      - run: dotnet build apps/api/CareerOS.sln --configuration Release --no-restore
+      - run: dotnet test apps/api/CareerOS.sln --configuration Release --no-build --logger trx
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: apps/api/**/TestResults/*.trx
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose --env-file .env.example config --quiet

@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../CareerOS.Domain/CareerOS.Domain.csproj" /></ItemGroup>
+</Project>
