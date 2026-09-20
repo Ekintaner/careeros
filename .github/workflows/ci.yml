@@ -12,6 +12,8 @@ jobs:
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      API_INTERNAL_URL: "http://localhost:5080"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

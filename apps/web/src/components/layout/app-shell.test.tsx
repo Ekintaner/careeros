@@ -1,7 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "./app-shell";
-import OverviewPage from "@/app/page";
+import OverviewPage from "@/app/(workspace)/page";
+
+vi.mock("@/features/auth/auth-provider", () => ({
+  AccountMenu: () => <span>Test account</span>,
+}));
 
 describe("workspace shell", () => {
   it("shows an honest overview and marks future tools unavailable", () => {

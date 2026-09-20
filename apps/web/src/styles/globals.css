@@ -567,3 +567,223 @@ h1 {
     line-height: 1.6;
   }
 }
+
+/* Account pages use the workspace palette and typography. */
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 6vw 24px;
+}
+.auth-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-muted);
+}
+.auth-brand .brand {
+  margin: 0;
+  padding: 0;
+  color: var(--color-ink);
+}
+.auth-brand > span {
+  font-size: 12px;
+}
+.auth-layout {
+  width: min(100%, 960px);
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 90px;
+  padding: 72px 0;
+  align-items: center;
+}
+.auth-aside h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 500;
+  letter-spacing: -2px;
+  line-height: 1.15;
+  margin: 24px 0;
+}
+.auth-aside p {
+  color: var(--color-muted);
+  max-width: 290px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.auth-rule {
+  height: 1px;
+  background: var(--color-line);
+  margin: 40px 0 22px;
+  width: 60px;
+}
+.auth-card {
+  background: var(--color-panel);
+  padding: 36px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+}
+.auth-card h1 {
+  font-size: 27px;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  margin: 12px 0;
+  font-weight: 550;
+}
+.auth-intro {
+  color: var(--color-muted);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.auth-field {
+  margin-top: 20px;
+}
+.auth-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.auth-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #9eada2;
+  border-radius: 4px;
+  font: inherit;
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+.auth-field input[aria-invalid="true"] {
+  border-color: #a23c31;
+}
+.password-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  margin-top: 10px;
+  color: var(--color-accent);
+}
+.password-tools button {
+  border: 0;
+  background: transparent;
+  padding: 3px 0;
+  cursor: pointer;
+}
+.auth-card a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.field-hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+.field-error,
+.auth-error {
+  color: #912e26;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.auth-error {
+  padding: 12px;
+  background: #fcf3f1;
+  border-left: 2px solid #a23c31;
+}
+.auth-submit {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-accent);
+  color: white;
+  border: 0;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.auth-switch {
+  text-align: center;
+  border-top: 1px solid var(--color-line);
+  padding-top: 22px;
+  margin: 24px 0 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.auth-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-line);
+  padding-top: 20px;
+}
+.auth-success {
+  line-height: 1.7;
+}
+.auth-success h2 {
+  font-size: 18px;
+}
+.session-state {
+  max-width: 600px;
+  padding: 60px 24px;
+  margin: auto;
+  line-height: 1.7;
+}
+.session-state button,
+.account-menu button {
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  background: var(--color-panel);
+  cursor: pointer;
+}
+.account-menu {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+}
+.account-menu small {
+  display: block;
+  color: var(--color-muted);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 800px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    padding: 44px 0;
+    gap: 0;
+  }
+  .auth-aside {
+    display: none;
+  }
+  .auth-brand > span {
+    display: none;
+  }
+  .auth-card {
+    padding: 28px 22px;
+  }
+  .auth-page {
+    padding: 24px 20px;
+  }
+  .account-menu small {
+    display: none;
+  }
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}

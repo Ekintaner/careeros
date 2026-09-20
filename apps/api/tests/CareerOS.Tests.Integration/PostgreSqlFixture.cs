@@ -48,6 +48,7 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
 
 public sealed class TestDatabase(string adminConnection, string connectionString, string databaseName) : IAsyncDisposable
 {
+    public string ConnectionString => connectionString;
     public CareerOSDbContext Context(TimeProvider? clock = null) => new(
         new DbContextOptionsBuilder<CareerOSDbContext>().UseNpgsql(connectionString).Options, clock);
 

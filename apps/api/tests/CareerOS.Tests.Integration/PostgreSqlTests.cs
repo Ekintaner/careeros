@@ -25,17 +25,17 @@ public sealed class PostgreSqlTests(PostgreSqlFixture fixture)
         await using var context = database.Context();
         await context.Database.MigrateAsync();
         Assert.False(context.Database.HasPendingModelChanges());
-        Assert.Equal(17L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
+        Assert.Equal(19L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
         Assert.Equal(0L, await database.ScalarAsync<long>("SELECT count(*) FROM pg_constraint WHERE contype = 'f' AND confdeltype <> 'r'"));
         Assert.True(await database.ScalarAsync<bool>("SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'resumes' AND indexdef LIKE '%UNIQUE%' AND indexdef LIKE '%WHERE%')"));
         Assert.True(await database.ScalarAsync<bool>("SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'job_applications' AND indexdef LIKE '%UNIQUE%' AND indexdef LIKE '%\"UserId\", \"JobId\"%')"));
         Assert.True(await database.ScalarAsync<bool>("SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'application_status_history' AND indexdef LIKE '%\"ApplicationId\", \"ChangedAtUtc\", \"Sequence\"%')"));
         Assert.Equal(0L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND column_name LIKE '%Utc' AND data_type <> 'timestamp with time zone'"));
-        Assert.Single(await context.Database.GetAppliedMigrationsAsync());
+        Assert.Equal(2, (await context.Database.GetAppliedMigrationsAsync()).Count());
         await context.GetService<IMigrator>().MigrateAsync("0");
         Assert.Equal(0L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
         await context.Database.MigrateAsync();
-        Assert.Equal(17L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
+        Assert.Equal(19L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
     }
 
     [PostgreSqlFact]
@@ -314,7 +314,7 @@ public sealed class PostgreSqlTests(PostgreSqlFixture fixture)
     private static Document NewDocument(Guid userId) =>
         new(userId, "CV", "cv.pdf", Guid.NewGuid().ToString("N"), "application/pdf", 123, DocumentType.Resume);
 
-    private static async Task<Graph> AddGraph(CareerOSDbContext context)
+    internal static async Task<Graph> AddGraph(CareerOSDbContext context)
     {
         var user = new User($"{Guid.NewGuid():N}@example.com", "Test User");
         var company = new Company(user.Id, "Example");
@@ -335,7 +335,7 @@ public sealed class PostgreSqlTests(PostgreSqlFixture fixture)
         return new Graph(user, company, job, document, resume, application, interview);
     }
 
-    private sealed record Graph(User User, Company Company, Job Job, Document Document, Resume Resume, JobApplication Application, Interview Interview);
+    internal sealed record Graph(User User, Company Company, Job Job, Document Document, Resume Resume, JobApplication Application, Interview Interview);
     private sealed class FixedClock(DateTimeOffset now) : TimeProvider
     {
         public override DateTimeOffset GetUtcNow() => now;

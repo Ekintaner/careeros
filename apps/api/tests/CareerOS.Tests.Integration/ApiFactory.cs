@@ -16,6 +16,9 @@ internal sealed class ApiFactory : WebApplicationFactory<Program>
             {
                 ["ConnectionStrings:PostgreSql"] = "Host=127.0.0.1;Port=1;Database=unavailable;Username=test;Timeout=1",
                 ["ConnectionStrings:Redis"] = "127.0.0.1:1,connectTimeout=500,asyncTimeout=500",
+                ["Auth:Issuer"] = "careeros-tests",
+                ["Auth:Audience"] = "careeros-tests",
+                ["Auth:SigningKey"] = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32)),
                 ["Cors:AllowedOrigins:0"] = "http://localhost:3000"
             }));
         builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, ThrowingStartupFilter>());

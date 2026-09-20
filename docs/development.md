@@ -39,7 +39,7 @@ export ConnectionStrings__PostgreSql='Host=localhost;Port=5432;Database=careeros
 export ConnectionStrings__Redis='localhost:6379'
 ```
 
-Open `http://localhost:5080/swagger` in Development. `/health/live` should return 200 even if dependencies are down. `/health` requires both dependencies and returns 503 otherwise. Health endpoints are deliberately unversioned. The v1 product contract is reserved but has no endpoints yet.
+Open `http://localhost:5080/swagger` in Development. `/health/live` should return 200 even if dependencies are down. `/health` requires both dependencies and returns 503 otherwise. Health endpoints are deliberately unversioned. Authentication routes are under /api/v1/auth; see [authentication](authentication.md).
 
 ## Frontend workflow
 
@@ -54,7 +54,7 @@ npm run build
 npm run start --workspace apps/web
 ```
 
-Next.js serves port 3000. The last command requires a completed build; do not run dev and production on the same port simultaneously. Public environment variables are embedded at build time. The shell renders without API availability and never fabricates user statistics.
+Next.js serves port 3000. The last command requires a completed build; do not run dev and production on the same port simultaneously. Public environment variables are embedded at build time. Account pages render independently; workspace access requires the configured API and a real login. Service failures show safe errors, not a fake session.
 
 ## Backend workflow and migrations
 
@@ -120,9 +120,29 @@ Commit npm and NuGet lockfiles. To intentionally update NuGet resolution, restor
 - **Connection configuration validation fails:** set both API connection strings. A Compose `.env` alone is insufficient.
 - **Readiness 503:** inspect service health, ports and local credentials; a healthy liveness check does not imply healthy dependencies.
 - **Docker pipe/socket missing:** start Docker Desktop/Engine. Compose configuration validation works without the engine, container tests do not.
-- **CORS failure:** update `Cors:AllowedOrigins` to the exact frontend origin, without a trailing slash. Production has no enabled CORS policy yet.
+- **CORS failure:** update `Cors:AllowedOrigins` to the exact frontend origin, without a trailing slash. Production requires explicit HTTPS origins. Mutations also require the trusted Origin and X-CareerOS-CSRF header.
 - **Port conflict:** adjust Compose ports and corresponding API connection strings together; changing only one breaks readiness.
 - **API URL missing:** set `apps/web/.env.local` and restart/rebuild Next.js.
 - **Restore blocked by network:** allow registry.npmjs.org and api.nuget.org, then retry; do not suppress restore errors.
 
-No production deployment, authentication or product workflows are included in this phase. Personal-data schema exists, but server authorization must be implemented before exposing it through APIs.
+Authentication and server ownership boundaries are implemented. Product CRUD, production delivery and deployment remain deferred.
+
+## Authentication setup (CODEX-003)
+
+Alongside database/Redis connection strings, set the following through user-secrets or the process environment. Choose a cryptographically random signing key (base64-encoded, at least 32 random bytes) in your own secret store; no example secret is usable.
+
+```sh
+dotnet user-secrets set "Auth:Issuer" "careeros-local" --project apps/api/src/CareerOS.Api
+dotnet user-secrets set "Auth:Audience" "careeros-web" --project apps/api/src/CareerOS.Api
+dotnet user-secrets set "Auth:SigningKey" "<base64-random-key>" --project apps/api/src/CareerOS.Api
+```
+
+Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply both migrations explicitly before signing up.
+
+Set `API_INTERNAL_URL=http://localhost:5080` in apps/web/.env.local. This is server-only configuration; restart/rebuild Next after changing its rewrite destination. The browser uses same-origin `/api/v1`, not a public backend URL. Keep `Cors:AllowedOrigins` equal to the actual web origin (default http://localhost:3000). No cookies or credentials belong in NEXT_PUBLIC variables.
+
+Register through /register, then Overview shows the account. Logout revokes its session. Forgot-password deliberately returns 503 until delivery is configured. For isolated development/debugging only, opt in with `Auth__DevelopmentCapture=true`: inspect DevelopmentResetCapture through a debugger or the integration-test DI container and consume its Take(email) value. Nothing is printed and no capture endpoint exists. Use `/reset-password#token=<captured-token>` locally. Capture is bounded, expires and is forbidden outside Development. Production email and verification are not implemented.
+
+Production requires Secure cookies/HTTPS origins and a real secret manager; configure AllowedHosts and a trusted ingress before exposure. Do not trust arbitrary forwarded headers. See the proxy, throttling, delivery and retention requirements in [authentication](authentication.md).
+
+The existing PostgreSQL test switch now also runs authentication and complete two-user ownership tests. Test signing keys/passwords are generated or test-only; no default authentication bypass exists in the application. The generated auth migration can be inspected with the same EF commands above.

@@ -24,7 +24,7 @@ export default function OverviewPage() {
           </p>
           <div className="status-note">
             <span className="status-dot" />
-            You’re viewing the foundation preview
+            Your workspace is ready
           </div>
         </div>
         <div className="workspace-illustration" aria-hidden="true">
@@ -81,9 +81,9 @@ export default function OverviewPage() {
       <aside className="foundation-note">
         <span className="note-symbol">i</span>
         <p>
-          <strong>A considered starting point.</strong> This preview establishes
-          your workspace layout. Adding data, account access and the tools in
-          the sidebar are planned for future releases.
+          <strong>A considered starting point.</strong> Your account is ready.
+          Adding data and the tools in the sidebar are planned for future
+          releases.
         </p>
       </aside>
     </div>

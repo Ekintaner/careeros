@@ -42,8 +42,7 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddDbContext<CareerOSDbContext>((provider, options) =>
-            options.UseNpgsql(provider.GetRequiredService<IOptions<DependencyOptions>>().Value.PostgreSql,
-                postgres => postgres.EnableRetryOnFailure(3)));
+            options.UseNpgsql(provider.GetRequiredService<IOptions<DependencyOptions>>().Value.PostgreSql));
 
         services.AddSingleton<RedisConnection>();
         services.AddHealthChecks()

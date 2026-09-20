@@ -4,7 +4,7 @@ CareerOS is a full-stack job search operating system for managing applications, 
 
 ## Overview
 
-A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture** and **CODEX-002: Core Domain & PostgreSQL Data Architecture**.
+A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture**, **CODEX-002: Core Domain & PostgreSQL Data Architecture** and **CODEX-003: Authentication, Security & Data Ownership**.
 
 ## Product Vision
 
@@ -14,7 +14,9 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented:** responsive application shell, honest empty Overview, disabled future navigation, typed API client, ASP.NET API host, structured request logging, error handling, health checks, EF Core/PostgreSQL and Redis connectivity, 17 domain/persistence entities, an initial PostgreSQL schema migration, ownership constraints, auditable timestamps, optimistic concurrency, development infrastructure, tests and CI.
 
-**Planned:** authentication and server-scoped queries, product APIs/UI for profiles, companies, jobs, applications, resumes, skills, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and AI assistance. Domain entities and database tables now exist, but no product endpoints, uploads, delivery or user workflows are exposed. The shell remains a visual preview, not an authenticated session. No records are seeded automatically.
+**Implemented in CODEX-003:** registration/login/recovery pages, protected workspace, JWT access cookies, rotating refresh sessions, replay detection, logout/all, password change/reset, current-user ownership boundary, rate limits and CSRF protection. See [authentication](docs/authentication.md).
+
+**Planned:** product APIs/UI for profiles, companies, jobs, applications, resumes, skills, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and AI assistance. Domain entities and database tables now exist, but no product endpoints, uploads, delivery or user workflows are exposed. The shell requires a real account; feature navigation remains disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
 
 ## Technology Stack
 
@@ -75,9 +77,9 @@ See [development guide](docs/development.md) for complete PowerShell and POSIX c
 
 ## Environment Configuration
 
-The root `.env` is consumed by **Docker Compose only**. ASP.NET reads `ConnectionStrings__PostgreSql`, `ConnectionStrings__Redis`, and normal .NET configuration sources. For local credentials prefer `dotnet user-secrets`. Next.js reads `apps/web/.env.local`; `NEXT_PUBLIC_API_BASE_URL` is public, build-time browser configuration, never a place for secrets. The overview makes no API calls yet. Missing API URL fails clearly when the client is first used.
+The root `.env` is consumed by **Docker Compose only**. ASP.NET reads `ConnectionStrings__PostgreSql`, `ConnectionStrings__Redis`, and normal .NET configuration sources. For local credentials prefer `dotnet user-secrets`. Next.js reads server-only `API_INTERNAL_URL` from `apps/web/.env.local` for its same-origin API rewrite and server account checks. No backend secret belongs in a NEXT_PUBLIC variable. Authentication additionally requires issuer, audience, a configured signing key and explicit frontend origins; see [setup](docs/development.md).
 
-The API fails startup when required connection strings are absent or malformed. Unreachable configured dependencies do not prevent liveness; readiness reports failure. Development CORS allows `http://localhost:3000` only. Override `Cors__AllowedOrigins__0` if needed. Configure `AllowedHosts` and an explicit production HTTPS/reverse-proxy policy before deployment; there is no production deployment configuration in this phase.
+The API fails startup when required connection strings are absent or malformed. Unreachable configured dependencies do not prevent liveness; readiness reports failure. Credentialed CORS/CSRF allow explicitly configured origins; Development defaults to `http://localhost:3000`. Override `Cors__AllowedOrigins__0` if needed. Configure `AllowedHosts` and an explicit production HTTPS/reverse-proxy policy before deployment; there is no production deployment configuration in this phase.
 
 ## Docker
 
@@ -93,7 +95,7 @@ The shell uses semantic navigation, focus indicators, a skip link and a native m
 
 `dotnet run --project apps/api/src/CareerOS.Api`. Development OpenAPI JSON is at `/swagger/v1/swagger.json` and Swagger UI at `/swagger`. `/health/live` checks the running host; `/health` actually probes PostgreSQL and Redis and returns 503 if unavailable. Neither endpoint exposes connection strings or exception details. `X-Correlation-ID` is validated and returned with responses, and appears in structured JSON logs and ProblemDetails.
 
-Future HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema` migration defines the real relational model. Apply it explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
+Future HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema` and `AuthenticationFoundation` migrations define the domain and authentication schemas. Apply it explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
 
 ## Testing
 
@@ -112,7 +114,7 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 
 1. CODEX-001 — foundation (complete).
 2. CODEX-002 — core domain and PostgreSQL schema (complete).
-3. CODEX-003 — authentication and server-enforced ownership, with a supported-runtime upgrade before production.
+3. CODEX-003 — authentication and server-enforced ownership (complete; production delivery/deployment remain separate).
 4. First real vertical slices: companies, opportunities and application tracking.
 5. Document/resume workflows, interviews and follow-ups.
 6. Explainable matching, analytics and career intelligence.

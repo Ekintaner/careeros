@@ -1,12 +1,12 @@
 # Core domain and PostgreSQL architecture
 
-CODEX-002 defines persistence and domain invariants. It does **not** expose product APIs, implement authentication, run matching, upload files, deliver notifications or populate the frontend. No seed data is installed.
+CODEX-002 defines persistence and domain invariants; CODEX-003 adds credential/session persistence and server ownership boundaries. Product CRUD, matching, uploads and notification delivery remain deferred. No seed data is installed.
 
 ## Entities and responsibilities
 
 | Domain entity            | PostgreSQL table             | Responsibility                                                    |
 | ------------------------ | ---------------------------- | ----------------------------------------------------------------- |
-| User                     | `users`                      | Stable account ID, email and display name; no credentials         |
+| User                     | `users`                      | Stable account ID, email/display name and authentication state    |
 | CareerProfile            | `career_profiles`            | Optional one-to-one career information for a user                 |
 | Company                  | `companies`                  | User's company record; names need not be globally unique          |
 | Job                      | `jobs`                       | Opportunity belonging to a company, independent of an application |
@@ -71,7 +71,7 @@ User-owned references use composite foreign keys: `(UserId, CompanyId)` referenc
 
 Resume's document FK also includes DocumentType and a check requiring `Resume`. Its principal key is `(UserId, Id, Type)` on documents, so an unrelated user's document or a cover letter cannot be used as a resume. These alternate keys exist to support relational ownership checks, not as extra business identifiers.
 
-DbContext rejects ownership mutation on tracked records. **This is not query authorization.** There are no tenant filters, RLS policies or fake CurrentUser service. CODEX-003 must derive UserId from a trusted authenticated identity and scope every query and command on the server. Shared skill creation/renaming also needs an explicit authorization policy before endpoints are exposed. Never serialize these entities directly as public API contracts.
+DbContext rejects ownership mutation on tracked records. **This is not query authorization.** There are no global tenant filters or RLS policies. CODEX-003 HttpCurrentUser derives UserId from validated claims; OwnedData explicitly scopes product queries and guards writes. Authentication has narrowly scoped account/session queries. Shared skill creation/renaming also needs an explicit authorization policy before endpoints are exposed. Never serialize these entities directly as public API contracts.
 
 ## Normalization and uniqueness
 
@@ -158,4 +158,12 @@ The first real migration is `20260919231621_InitialDomainSchema`, generated thro
 
 The PostgreSQL test fixture creates a new randomly named database per test and deletes only that database afterwards. CI opts into Testcontainers. For local testing without Docker, `CAREEROS_TEST_POSTGRES` may point to a **disposable PostgreSQL server** with CREATE DATABASE permission; tests create/drop their own `careeros_test_<uuid>` databases and never reset the supplied database. Never point test configuration at production. Neither test mode substitutes an in-memory provider.
 
-Coverage includes migration/apply/rollback/reapply, schema/index inspection, all cross-owner dependent references, deletion restrictions, normalized uniqueness, application/profile uniqueness, primary-resume switching, check constraints, UTC/audit handling, atomic history and xmin concurrency. Authentication, query authorization and frontend feature work remain CODEX-003 or later.
+Coverage includes migration/apply/rollback/reapply, schema/index inspection, all cross-owner dependent references, deletion restrictions, normalized uniqueness, application/profile uniqueness, primary-resume switching, check constraints, UTC/audit handling, atomic history and xmin concurrency. Authentication and ownership-boundary integration coverage are documented in [authentication](authentication.md). Product CRUD remains deferred.
+
+## CODEX-003 migration
+
+`20260919234449_AuthenticationFoundation` adds nullable password hash, email-verification timestamp and last-login timestamp, plus a security stamp to users. Existing IDs and career rows remain intact; pre-authentication accounts have no usable credentials until recovery establishes a password.
+
+Two tables bring the total to 19: refresh_tokens (one hashed generation per rotation, user/family/replacement metadata) and password_reset_tokens (hashed expiring single-use tokens). Both have unique hash and expiry indexes and RESTRICT ownership FKs. Refresh replacements use a composite user/family/ID FK; CHECKs enforce digest shape, expiry/revocation ordering and replacement revocation. No raw persistent token, user-agent or IP is stored. See [authentication](authentication.md) for locking, absolute expiry, replay and retention requirements.
+
+The generated migration is tested on a clean database, after InitialDomainSchema containing an existing user, on rollback to InitialDomainSchema, on complete rollback and on reapplication. InitialDomainSchema remains unchanged.

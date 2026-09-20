@@ -1,3 +1,4 @@
+import { AccountMenu } from "@/features/auth/auth-provider";
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/ui/icon";
 
@@ -93,7 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="breadcrumb">
             Workspace <span>/</span> <strong>Overview</strong>
           </span>
-          <span className="phase-label">Foundation preview</span>
+          <AccountMenu />
         </header>
         <details className="mobile-nav">
           <summary>

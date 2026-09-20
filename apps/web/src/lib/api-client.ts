@@ -96,8 +96,7 @@ export function createApiClient(
 }
 
 export function getApiClient() {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl)
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is required to call the API.");
-  return createApiClient(baseUrl);
+  if (typeof window === "undefined")
+    throw new Error("Use a server-only client on the server.");
+  return createApiClient(window.location.origin);
 }
