@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthForm } from "./auth-form";
-import { AccountMenu, AuthGate, AuthProvider } from "./auth-provider";
+import { AccountMenu, AuthGate, AuthProvider, useAuth } from "./auth-provider";
 import { ApiError } from "@/lib/api-client";
 const mocks = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -36,6 +36,31 @@ function renderForm(
   );
 }
 describe("account forms and state", () => {
+  it("clears the protected workspace and preserves password-change feedback on redirect", async () => {
+    function PasswordChangedAction() {
+      const auth = useAuth();
+      return (
+        <button onClick={auth.passwordChanged}>Complete password change</button>
+      );
+    }
+    mocks.request.mockResolvedValue(account);
+    render(
+      <AuthProvider>
+        <AuthGate>
+          <p>Private settings</p>
+          <PasswordChangedAction />
+        </AuthGate>
+      </AuthProvider>,
+    );
+    await screen.findByText("Private settings");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Complete password change" }),
+    );
+    await waitFor(() =>
+      expect(mocks.replace).toHaveBeenCalledWith("/login?password=changed"),
+    );
+    expect(screen.queryByText("Private settings")).not.toBeInTheDocument();
+  });
   it("validates login before making a credential request", async () => {
     renderForm("login");
     const submit = screen.getByRole("button", { name: "Sign in" });

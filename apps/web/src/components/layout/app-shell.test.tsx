@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "./app-shell";
 import OverviewPage from "@/app/(workspace)/page";
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 vi.mock("@/features/auth/auth-provider", () => ({
   AccountMenu: () => <span>Test account</span>,

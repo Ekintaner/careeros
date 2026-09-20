@@ -1,6 +1,6 @@
 # Core domain and PostgreSQL architecture
 
-CODEX-002 defines persistence and domain invariants; CODEX-003 adds credential/session persistence and server ownership boundaries. Product CRUD, matching, uploads and notification delivery remain deferred. No seed data is installed.
+CODEX-002 defines persistence and domain invariants; CODEX-003 adds credential/session persistence and server ownership boundaries. CODEX-004 implements profile/skills/account behavior; other product CRUD, matching, uploads and notification delivery remain deferred. No seed data is installed.
 
 ## Entities and responsibilities
 
@@ -71,7 +71,7 @@ User-owned references use composite foreign keys: `(UserId, CompanyId)` referenc
 
 Resume's document FK also includes DocumentType and a check requiring `Resume`. Its principal key is `(UserId, Id, Type)` on documents, so an unrelated user's document or a cover letter cannot be used as a resume. These alternate keys exist to support relational ownership checks, not as extra business identifiers.
 
-DbContext rejects ownership mutation on tracked records. **This is not query authorization.** There are no global tenant filters or RLS policies. CODEX-003 HttpCurrentUser derives UserId from validated claims; OwnedData explicitly scopes product queries and guards writes. Authentication has narrowly scoped account/session queries. Shared skill creation/renaming also needs an explicit authorization policy before endpoints are exposed. Never serialize these entities directly as public API contracts.
+DbContext rejects ownership mutation on tracked records. **This is not query authorization.** There are no global tenant filters or RLS policies. CODEX-003 HttpCurrentUser derives UserId from validated claims; OwnedData explicitly scopes product queries and guards writes. Authentication has narrowly scoped account/session queries. CODEX-004 allows authenticated insertion/search of validated shared vocabulary; canonical renaming/deletion remain unavailable. Owned skill metadata still requires OwnedData. Never serialize these entities directly as public API contracts.
 
 ## Normalization and uniqueness
 
@@ -158,7 +158,11 @@ The first real migration is `20260919231621_InitialDomainSchema`, generated thro
 
 The PostgreSQL test fixture creates a new randomly named database per test and deletes only that database afterwards. CI opts into Testcontainers. For local testing without Docker, `CAREEROS_TEST_POSTGRES` may point to a **disposable PostgreSQL server** with CREATE DATABASE permission; tests create/drop their own `careeros_test_<uuid>` databases and never reset the supplied database. Never point test configuration at production. Neither test mode substitutes an in-memory provider.
 
-Coverage includes migration/apply/rollback/reapply, schema/index inspection, all cross-owner dependent references, deletion restrictions, normalized uniqueness, application/profile uniqueness, primary-resume switching, check constraints, UTC/audit handling, atomic history and xmin concurrency. Authentication and ownership-boundary integration coverage are documented in [authentication](authentication.md). Product CRUD remains deferred.
+Coverage includes migration/apply/rollback/reapply, schema/index inspection, all cross-owner dependent references, deletion restrictions, normalized uniqueness, application/profile uniqueness, primary-resume switching, check constraints, UTC/audit handling, atomic history and xmin concurrency. Authentication and ownership-boundary integration coverage are documented in [authentication](authentication.md). Profile/skills/account behavior is covered in [profile](profile.md); other product CRUD remains deferred.
+
+## CODEX-004 preferences
+
+`20260920091054_CareerProfilePreferences` adds four default-empty bounded arrays to career_profiles: TargetRoles, PreferredLocations, EmploymentTypes and SeniorityLevels. Database checks enforce cardinality, null/empty element restrictions, one dimension and existing enum membership. Text columns constrain element length; application validation trims and deduplicates entries. A varchar_pattern_ops index supports canonical skill prefix lookup without altering the unique generated normalization index. The total remains 19 tables. See [profile](profile.md) for ownership, concurrent canonical creation, row-version contracts and migration verification.
 
 ## CODEX-003 migration
 

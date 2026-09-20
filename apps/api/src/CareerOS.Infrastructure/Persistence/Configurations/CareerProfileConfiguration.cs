@@ -20,5 +20,21 @@ internal sealed class CareerProfileConfiguration : IEntityTypeConfiguration<Care
         b.Property(x => x.YearsOfExperience).HasPrecision(4, 1);
         Mapping.Check(b, "experience_range", "\"YearsOfExperience\" BETWEEN 0 AND 100");
         Mapping.Enum<CareerProfile, WorkMode>(b, nameof(CareerProfile.PreferredWorkMode), true);
+        TextArray(b, nameof(CareerProfile.TargetRoles), 100, 10);
+        TextArray(b, nameof(CareerProfile.PreferredLocations), 200, 10);
+        EnumArray<EmploymentType>(b, nameof(CareerProfile.EmploymentTypes));
+        EnumArray<SeniorityLevel>(b, nameof(CareerProfile.SeniorityLevels));
+    }
+
+    private static void TextArray(EntityTypeBuilder<CareerProfile> b, string name, int length, int count)
+    {
+        b.Property<string[]>(name).HasColumnType($"character varying({length})[]").HasDefaultValueSql("'{}'").IsRequired();
+        Mapping.Check(b, name + "_bounds", $"cardinality(\"{name}\") <= {count} AND array_position(\"{name}\", NULL) IS NULL AND array_position(\"{name}\", '') IS NULL AND (array_ndims(\"{name}\") IS NULL OR array_ndims(\"{name}\") = 1)");
+    }
+    private static void EnumArray<T>(EntityTypeBuilder<CareerProfile> b, string name) where T : struct, Enum
+    {
+        TextArray(b, name, 32, System.Enum.GetNames<T>().Length);
+        var values = string.Join(",", System.Enum.GetNames<T>().Select(v => $"'{v}'"));
+        Mapping.Check(b, name + "_values", $"\"{name}\"::text[] <@ ARRAY[{values}]::text[]");
     }
 }

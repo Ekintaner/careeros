@@ -4,7 +4,7 @@ CareerOS is a full-stack job search operating system for managing applications, 
 
 ## Overview
 
-A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture**, **CODEX-002: Core Domain & PostgreSQL Data Architecture** and **CODEX-003: Authentication, Security & Data Ownership**.
+A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture**, **CODEX-002: Core Domain & PostgreSQL Data Architecture**, **CODEX-003: Authentication, Security & Data Ownership**, and **CODEX-004: Career Profile, Skills & Account Settings**.
 
 ## Product Vision
 
@@ -16,7 +16,13 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented in CODEX-003:** registration/login/recovery pages, protected workspace, JWT access cookies, rotating refresh sessions, replay detection, logout/all, password change/reset, current-user ownership boundary, rate limits and CSRF protection. See [authentication](docs/authentication.md).
 
-**Planned:** product APIs/UI for profiles, companies, jobs, applications, resumes, skills, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and AI assistance. Domain entities and database tables now exist, but no product endpoints, uploads, delivery or user workflows are exposed. The shell requires a real account; feature navigation remains disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
+**Implemented in CODEX-004:** authenticated `/profile` and `/settings`, persistent career information/job preferences, canonical skill search and owned skill management, display-name editing and password-change UI. See [profile architecture](docs/profile.md).
+
+**Planned:** companies, jobs, applications, resumes, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
+
+## Zero-cost requirement
+
+CareerOS must remain fully usable by a single personal user without requiring a paid API, paid AI provider, paid database, paid Redis provider, paid storage provider, paid email provider, paid domain, or mandatory paid hosting service. Prefer open-source, local/self-hostable, or genuinely usable free solutions. Any paid integration must be optional, disabled by default, and must not be necessary for core functionality. Mandatory usage-metered SaaS is excluded. CODEX-004 adds no dependency or cloud service.
 
 ## Technology Stack
 
@@ -95,7 +101,7 @@ The shell uses semantic navigation, focus indicators, a skip link and a native m
 
 `dotnet run --project apps/api/src/CareerOS.Api`. Development OpenAPI JSON is at `/swagger/v1/swagger.json` and Swagger UI at `/swagger`. `/health/live` checks the running host; `/health` actually probes PostgreSQL and Redis and returns 503 if unavailable. Neither endpoint exposes connection strings or exception details. `X-Correlation-ID` is validated and returned with responses, and appears in structured JSON logs and ProblemDetails.
 
-Future HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema` and `AuthenticationFoundation` migrations define the domain and authentication schemas. Apply it explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
+HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema`, `AuthenticationFoundation`, and `CareerProfilePreferences` migrations define the schema. Apply them explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
 
 ## Testing
 
@@ -115,9 +121,10 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 1. CODEX-001 — foundation (complete).
 2. CODEX-002 — core domain and PostgreSQL schema (complete).
 3. CODEX-003 — authentication and server-enforced ownership (complete; production delivery/deployment remain separate).
-4. First real vertical slices: companies, opportunities and application tracking.
-5. Document/resume workflows, interviews and follow-ups.
-6. Explainable matching, analytics and career intelligence.
+4. CODEX-004 — career profile, skills and account settings (complete).
+5. Companies, opportunities and application tracking.
+6. Document/resume workflows, interviews and follow-ups.
+7. Explainable matching, analytics and career intelligence.
 
 ## License
 

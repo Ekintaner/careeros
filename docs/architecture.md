@@ -4,6 +4,8 @@
 
 Keep dependencies explicit, compile with strict types and nullable references, and add abstractions only for real use cases. Separate business rules from delivery and persistence. Prefer a modular monolith over distributed services while requirements are still forming. Never make the UI or health checks claim data or infrastructure exists when it does not.
 
+Core functionality must remain usable by one personal user with no paid API, AI, database, Redis, storage, email, domain, hosting or usage-metered SaaS requirement. Prefer local/self-hostable and genuinely usable free options; paid integrations must be optional and disabled by default. See the permanent rule in [profile architecture](profile.md).
+
 ## Monorepo
 
 `apps/web` and `apps/api` have independent runtimes. npm workspaces provide one JavaScript lockfile without an extra orchestration platform. The .NET solution uses per-project NuGet lockfiles. Root configuration captures formatting, runtime choices and local infrastructure.
@@ -17,7 +19,7 @@ Keep dependencies explicit, compile with strict types and nullable references, a
 | Infrastructure | EF Core, PostgreSQL, Redis and future external adapters | Application, Domain          |
 | Api            | HTTP, configuration, middleware and composition         | Application, Infrastructure  |
 
-Domain contains the 17 original entities with protected mutation methods, explicit skill associations, ordered application history and validation, plus refresh/reset token lifecycle entities. Application defines authentication contracts, password policy, current-user and recovery-delivery boundaries. Infrastructure owns EF configurations, the generated InitialDomainSchema migration, UTC audit handling, PostgreSQL concurrency mapping and Redis connection lifetime. API composes services and exposes the authentication endpoint module; product CRUD remains deferred. Tests reference the projects whose types they test. No generic repositories, mediator pipeline or automatic database migrations at startup. See [database architecture](database.md) for the complete schema and ownership decisions.
+Domain contains the 17 original entities with protected mutation methods, explicit skill associations, ordered application history and validation, plus refresh/reset token lifecycle entities. Application defines authentication contracts, password policy, current-user and recovery-delivery boundaries. Infrastructure owns EF configurations, the generated InitialDomainSchema migration, UTC audit handling, PostgreSQL concurrency mapping and Redis connection lifetime. API composes services and exposes the authentication endpoint module; profile/skills/account endpoints are implemented in CODEX-004; other product CRUD remains deferred. Tests reference the projects whose types they test. No generic repositories, mediator pipeline or automatic database migrations at startup. See [database architecture](database.md) for the complete schema and ownership decisions.
 
 Minimal endpoints are sufficient for operational health. Future product endpoints should be grouped into cohesive endpoint modules with `/api/v1` route groups, typed contracts and explicit validation. Breaking contracts introduce a new URL major version; additive changes remain in v1. No versioning library is required before the first product API.
 
@@ -49,7 +51,13 @@ Test meaningful contracts: accessible shell structure and unavailable navigation
 
 ## Future extension
 
-CODEX-002 establishes account IDs and cross-owner relational integrity, but it does not authorize reads/writes. CODEX-003 implements validated JWT/cookie sessions, scoped /me and the tested OwnedData query/write boundary. Future product handlers must use that boundary. Retention/erasure policy and shared-skill administration also remain explicit future work. Then implement a small vertical slice using the existing domain/schema, API contracts and feature UI. Upgrade to .NET 10 LTS before .NET 8 support ends on November 10, 2026. Match-result persistence waits for a defined algorithm, input versioning and explanation contract; no arbitrary score columns are introduced now.
+CODEX-002 establishes account IDs and cross-owner relational integrity, but it does not authorize reads/writes. CODEX-003 implements validated JWT/cookie sessions, scoped /me and the tested OwnedData query/write boundary. Future product handlers must use that boundary. Retention/erasure policy and shared-skill administration also remain explicit future work. CODEX-004 now implements the profile/skills/account vertical slice using that boundary; see [profile](profile.md). Upgrade to .NET 10 LTS before .NET 8 support ends on November 10, 2026. Match-result persistence waits for a defined algorithm, input versioning and explanation contract; no arbitrary score columns are introduced now.
+
+## Career profile and settings
+
+CODEX-004 implements the first product endpoint module and profile/settings pages. Application owns DTOs and validation; ProfileService in Infrastructure coordinates existing domain behaviors through OwnedData. Four bounded native PostgreSQL arrays hold job preferences, using existing job enum names. Canonical skill insertion has a narrow shared-vocabulary policy with atomic insert-or-reuse; metadata remains owned. All edits use existing xmin concurrency. No new package, provider or deployment is required. See [profile](profile.md) for contracts, validation and migration decisions.
+
+The shell remains a server component with small client active-navigation components. Profile/settings page-local state uses the existing authenticated client and replaces saved snapshots after mutations. Form/query libraries remain unnecessary for this scope. Email changes and real verification delivery stay deferred; password change uses CODEX-003.
 
 ## Authentication design
 

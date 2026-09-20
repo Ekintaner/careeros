@@ -34,7 +34,7 @@ All paths below are under `/api/v1/auth`. Mutations require `X-CareerOS-CSRF: 1`
 | POST /forgot-password | email                                       | 200 generic message; generic 503 when delivery unavailable |
 | POST /reset-password  | token, newPassword                          | 204, consume reset tokens, revoke sessions, clear cookies  |
 
-Safe validation errors are 400 ProblemDetails, invalid credentials/sessions 401, failed CSRF 403 and throttling 429 with Retry-After. Responses never contain password/token hashes, security stamps or raw credentials in JSON. Kestrel limits request bodies to 16 KiB. Database failures fail closed. A request already authorized when revocation commits may finish; subsequent authentication checks fail.
+Safe validation errors are 400 ProblemDetails, invalid credentials/sessions 401, failed CSRF 403 and throttling 429 with Retry-After. Responses never contain password/token hashes, security stamps or raw credentials in JSON. Kestrel limits auth and other requests to 16 KiB; CODEX-004 allows 128 KiB specifically for PUT /api/v1/profile to support bounded Unicode content. Database failures fail closed. A request already authorized when revocation commits may finish; subsequent authentication checks fail.
 
 ## Access tokens
 
@@ -98,7 +98,7 @@ Custom request logs contain method/path/status/correlation/duration, never bodie
 
 Set Auth**Issuer, Auth**Audience and Auth**SigningKey through environment/secret manager. SigningKey is base64 encoding of at least 32 cryptographically random bytes; there is no default or generated development key. Examples are placeholders. Set Auth**AccessTokenMinutes, Auth**RefreshTokenDays, Cors**AllowedOrigins\_\_0 (additional numbered origins as needed), and AllowedHosts. API_INTERNAL_URL is server-only and used at build time by rewrites. It is never NEXT_PUBLIC. Startup rejects missing secrets, invalid origins/lifetimes and production capture. Key rotation currently invalidates access JWTs until refresh; overlapping signing keys are not implemented.
 
-No MFA, passkeys, social/OAuth, production email provider, erasure, product CRUD, uploads, analytics, matching, AI or deployment is included. Upgrade .NET 8 before November 10, 2026. Verification delivery, breached-password screening, distributed throttling, retention automation, a complete script CSP and delivery outbox remain explicit follow-ups.
+No MFA, passkeys, social/OAuth, production email provider, erasure, other product CRUD, uploads, analytics, matching, AI or deployment is included. Upgrade .NET 8 before November 10, 2026. Verification delivery, breached-password screening, distributed throttling, retention automation, a complete script CSP and delivery outbox remain explicit follow-ups.
 
 ## References
 

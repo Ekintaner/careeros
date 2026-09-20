@@ -1,4 +1,5 @@
 import { Icon } from "@/components/ui/icon";
+import Link from "next/link";
 
 export default function OverviewPage() {
   return (
@@ -82,8 +83,9 @@ export default function OverviewPage() {
         <span className="note-symbol">i</span>
         <p>
           <strong>A considered starting point.</strong> Your account is ready.
-          Adding data and the tools in the sidebar are planned for future
-          releases.
+          <Link href="/profile">Build your career profile →</Link> Add your
+          skills and job preferences while the remaining workspace tools take
+          shape.
         </p>
       </aside>
     </div>

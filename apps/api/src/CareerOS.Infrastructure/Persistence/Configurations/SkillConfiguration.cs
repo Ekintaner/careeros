@@ -15,5 +15,6 @@ internal sealed class SkillConfiguration : IEntityTypeConfiguration<Skill>
         b.Property(x => x.NormalizedName).HasMaxLength(100).HasComputedColumnSql("translate(btrim(\"Name\"), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')", stored: true);
         Mapping.Check(b, "name_canonical", "\"Name\" = btrim(\"Name\") AND \"Name\" ~ '^[ -~]+$'");
         b.HasIndex(x => x.NormalizedName).IsUnique();
+        b.HasIndex(x => x.NormalizedName, "IX_skills_NormalizedName_prefix").HasOperators("varchar_pattern_ops");
     }
 }

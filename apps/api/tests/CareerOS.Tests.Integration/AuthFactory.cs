@@ -42,6 +42,14 @@ internal sealed class Browser(HttpClient client, string origin = "http://localho
     public Dictionary<string, string> Cookies { get; } = new();
     public string Refresh => Cookies["careeros-refresh"];
     public string Access => Cookies["careeros-access"];
+    public async Task<HttpResponseMessage> Api(string path, HttpMethod? method = null, object? body = null, bool csrf = true)
+    {
+        using var request = new HttpRequestMessage(method ?? HttpMethod.Get, "/api/v1/" + path);
+        if (csrf) { request.Headers.Add("Origin", origin); request.Headers.Add("X-CareerOS-CSRF", "1"); }
+        if (Cookies.Count > 0) request.Headers.Add("Cookie", string.Join("; ", Cookies.Select(x => $"{x.Key}={x.Value}")));
+        if (body is not null) request.Content = JsonContent.Create(body);
+        return await client.SendAsync(request);
+    }
     public async Task<HttpResponseMessage> Send(string path, object? body = null, bool post = true, bool csrf = true, string? forwardedFor = null)
     {
         using var request = new HttpRequestMessage(post ? HttpMethod.Post : HttpMethod.Get, "/api/v1/auth/" + path);

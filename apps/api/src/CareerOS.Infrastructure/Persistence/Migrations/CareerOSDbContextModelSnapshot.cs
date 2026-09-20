@@ -36,17 +36,41 @@ namespace CareerOS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string[]>("EmploymentTypes")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("character varying(32)[]")
+                        .HasDefaultValueSql("'{}'");
+
                     b.Property<string>("Headline")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string[]>("PreferredLocations")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("character varying(200)[]")
+                        .HasDefaultValueSql("'{}'");
 
                     b.Property<string>("PreferredWorkMode")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<string[]>("SeniorityLevels")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("character varying(32)[]")
+                        .HasDefaultValueSql("'{}'");
+
                     b.Property<string>("Summary")
                         .HasMaxLength(10000)
                         .HasColumnType("character varying(10000)");
+
+                    b.Property<string[]>("TargetRoles")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("character varying(100)[]")
+                        .HasDefaultValueSql("'{}'");
 
                     b.Property<DateTime>("UpdatedAtUtc")
                         .ValueGeneratedOnAdd()
@@ -67,7 +91,19 @@ namespace CareerOS.Infrastructure.Persistence.Migrations
 
                     b.ToTable("career_profiles", null, t =>
                         {
+                            t.HasCheckConstraint("CK_CareerProfile_EmploymentTypes_bounds", "cardinality(\"EmploymentTypes\") <= 7 AND array_position(\"EmploymentTypes\", NULL) IS NULL AND array_position(\"EmploymentTypes\", '') IS NULL AND (array_ndims(\"EmploymentTypes\") IS NULL OR array_ndims(\"EmploymentTypes\") = 1)");
+
+                            t.HasCheckConstraint("CK_CareerProfile_EmploymentTypes_values", "\"EmploymentTypes\"::text[] <@ ARRAY['FullTime','PartTime','Contract','Temporary','Internship','Apprenticeship','Other']::text[]");
+
+                            t.HasCheckConstraint("CK_CareerProfile_PreferredLocations_bounds", "cardinality(\"PreferredLocations\") <= 10 AND array_position(\"PreferredLocations\", NULL) IS NULL AND array_position(\"PreferredLocations\", '') IS NULL AND (array_ndims(\"PreferredLocations\") IS NULL OR array_ndims(\"PreferredLocations\") = 1)");
+
                             t.HasCheckConstraint("CK_CareerProfile_PreferredWorkMode_values", "\"PreferredWorkMode\" IN ('OnSite', 'Hybrid', 'Remote')");
+
+                            t.HasCheckConstraint("CK_CareerProfile_SeniorityLevels_bounds", "cardinality(\"SeniorityLevels\") <= 8 AND array_position(\"SeniorityLevels\", NULL) IS NULL AND array_position(\"SeniorityLevels\", '') IS NULL AND (array_ndims(\"SeniorityLevels\") IS NULL OR array_ndims(\"SeniorityLevels\") = 1)");
+
+                            t.HasCheckConstraint("CK_CareerProfile_SeniorityLevels_values", "\"SeniorityLevels\"::text[] <@ ARRAY['Internship','Entry','Associate','Mid','Senior','Lead','Executive','Other']::text[]");
+
+                            t.HasCheckConstraint("CK_CareerProfile_TargetRoles_bounds", "cardinality(\"TargetRoles\") <= 10 AND array_position(\"TargetRoles\", NULL) IS NULL AND array_position(\"TargetRoles\", '') IS NULL AND (array_ndims(\"TargetRoles\") IS NULL OR array_ndims(\"TargetRoles\") = 1)");
 
                             t.HasCheckConstraint("CK_CareerProfile_audit_order", "\"UpdatedAtUtc\" >= \"CreatedAtUtc\"");
 
@@ -1058,6 +1094,10 @@ namespace CareerOS.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("NormalizedName")
                         .IsUnique();
+
+                    b.HasIndex(new[] { "NormalizedName" }, "IX_skills_NormalizedName_prefix");
+
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "NormalizedName" }, "IX_skills_NormalizedName_prefix"), new[] { "varchar_pattern_ops" });
 
                     b.ToTable("skills", null, t =>
                         {

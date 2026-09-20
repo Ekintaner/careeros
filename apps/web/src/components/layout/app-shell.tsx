@@ -1,6 +1,7 @@
 import { AccountMenu } from "@/features/auth/auth-provider";
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/ui/icon";
+import { Breadcrumb, NavigationLink } from "./navigation-link";
 
 const groups: { title: string; items: { label: string; icon: IconName }[] }[] =
   [
@@ -17,7 +18,6 @@ const groups: { title: string; items: { label: string; icon: IconName }[] }[] =
       title: "Career",
       items: [
         { label: "Resumes", icon: "resumes" },
-        { label: "Skills", icon: "skills" },
         { label: "Analytics", icon: "analytics" },
       ],
     },
@@ -33,10 +33,14 @@ const groups: { title: string; items: { label: string; icon: IconName }[] }[] =
 function Navigation() {
   return (
     <>
-      <Link className="nav-item active" href="/" aria-current="page">
+      <NavigationLink href="/">
         <Icon name="overview" />
         Overview
-      </Link>
+      </NavigationLink>
+      <NavigationLink href="/profile">
+        <Icon name="skills" />
+        Career profile
+      </NavigationLink>
       {groups.map((group) => (
         <section
           className="nav-group"
@@ -58,12 +62,12 @@ function Navigation() {
         </section>
       ))}
       <div className="nav-footer">
-        <button className="nav-item" disabled>
+        <NavigationLink href="/settings">
           <Icon name="settings" />
           Settings
-        </button>
+        </NavigationLink>
         <p>
-          Workspace foundation
+          Your career workspace
           <br />
           <span>More tools coming soon</span>
         </p>
@@ -91,9 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <span className="breadcrumb">
-            Workspace <span>/</span> <strong>Overview</strong>
-          </span>
+          <Breadcrumb />
           <AccountMenu />
         </header>
         <details className="mobile-nav">
@@ -102,6 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </summary>
           <nav aria-label="Mobile navigation">
             <Navigation />
+            <AccountMenu />
           </nav>
         </details>
         <main id="main-content" tabIndex={-1}>

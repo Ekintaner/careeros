@@ -32,6 +32,7 @@ export function validateAuth(
       mode !== "login" &&
       (values.password.length < 15 ||
         !values.password.trim() ||
+        new Set(values.password).size === 1 ||
         /[\x00-\x1f\x7f]/.test(values.password))
     )
       errors.password = "Use 15–128 characters without control characters.";

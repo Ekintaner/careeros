@@ -24,7 +24,13 @@ const copy = {
     "Reset password",
   ],
 };
-export function AuthForm({ mode }: { mode: AuthMode }) {
+export function AuthForm({
+  mode,
+  passwordChanged = false,
+}: {
+  mode: AuthMode;
+  passwordChanged?: boolean;
+}) {
   const { account, status, accept, reload } = useAuth();
   const router = useRouter();
   const [values, setValues] = useState({
@@ -175,6 +181,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </span>
           <h1 id="auth-title">{copy[mode][0]}</h1>
           <p className="auth-intro">{copy[mode][1]}</p>
+          {passwordChanged && (
+            <p role="status" className="save-success">
+              Password changed. All previous sessions were signed out. Sign in
+              with your new password.
+            </p>
+          )}
           {done ? (
             <div role="status" className="auth-success">
               <h2>

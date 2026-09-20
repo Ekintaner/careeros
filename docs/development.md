@@ -125,7 +125,15 @@ Commit npm and NuGet lockfiles. To intentionally update NuGet resolution, restor
 - **API URL missing:** set `apps/web/.env.local` and restart/rebuild Next.js.
 - **Restore blocked by network:** allow registry.npmjs.org and api.nuget.org, then retry; do not suppress restore errors.
 
-Authentication and server ownership boundaries are implemented. Product CRUD, production delivery and deployment remain deferred.
+Authentication, career profile, skills, account settings and server ownership boundaries are implemented. Other product CRUD, production delivery and deployment remain deferred.
+
+## Profile/settings workflow (CODEX-004)
+
+Apply the full migration chain using the existing EF update command, then register or sign in normally. Open `/profile` for career information, preferences and skill management; open `/settings` for account information, display-name editing and password change. There is no seed/default user. Skills use only the local PostgreSQL vocabulary. All profile fields start empty. Email is read-only; verification delivery remains unavailable.
+
+Edits include a server row version. To check conflicts, open the profile in two tabs, save one, then save the stale second tab: expect a 409 and preserved draft with a reload option. Changing a password signs out every session, including the current browser. Reauthenticate with the new password.
+
+No new npm/NuGet dependency, paid API, external skill service, cloud provisioning or configuration secret is required. Single-user core functionality must remain usable without a mandatory paid or usage-metered service. Keep future paid integrations optional and disabled by default. See [profile architecture](profile.md) and [CODEX-004 verification](verification-codex004.md).
 
 ## Authentication setup (CODEX-003)
 
@@ -137,7 +145,7 @@ dotnet user-secrets set "Auth:Audience" "careeros-web" --project apps/api/src/Ca
 dotnet user-secrets set "Auth:SigningKey" "<base64-random-key>" --project apps/api/src/CareerOS.Api
 ```
 
-Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply both migrations explicitly before signing up.
+Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply all three migrations explicitly before using the workspace.
 
 Set `API_INTERNAL_URL=http://localhost:5080` in apps/web/.env.local. This is server-only configuration; restart/rebuild Next after changing its rewrite destination. The browser uses same-origin `/api/v1`, not a public backend URL. Keep `Cors:AllowedOrigins` equal to the actual web origin (default http://localhost:3000). No cookies or credentials belong in NEXT_PUBLIC variables.
 

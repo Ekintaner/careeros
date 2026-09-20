@@ -1,16 +1,20 @@
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Http.Features;
 using CareerOS.Api.Authentication;
+using CareerOS.Api.Profiles;
+using CareerOS.Infrastructure.Profiles;
 using CareerOS.Api.Observability;
 using CareerOS.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 16 * 1024);
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 128 * 1024);
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<ProfileService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = context =>
@@ -40,6 +44,16 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseExceptionHandler();
+app.Use(async (context, next) =>
+{
+    // Profile summaries/preferences can require more UTF-8 bytes. Preserve the original auth/other-route limit.
+    if (!(context.Request.Method == "PUT" && context.Request.Path.Equals("/api/v1/profile", StringComparison.OrdinalIgnoreCase)))
+    {
+        var limit = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
+        if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = 16 * 1024;
+    }
+    await next(context);
+});
 app.UseStatusCodePages();
 app.UseCors();
 app.UseCareerSecurity();
@@ -60,6 +74,7 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 }).AllowAnonymous();
 
 app.MapCareerAuth();
+app.MapCareerProfile();
 app.Run();
 
 static Task WriteHealthResponse(HttpContext context, HealthReport report) =>

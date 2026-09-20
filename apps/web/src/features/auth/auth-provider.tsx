@@ -17,11 +17,14 @@ type AuthState = {
   reload: () => Promise<void>;
   accept: (account: Account) => void;
   logout: () => Promise<void>;
+  passwordChanged: () => void;
+  loginHref: string;
 };
 const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [status, setStatus] = useState<AuthState["status"]>("loading");
+  const [loginHref, setLoginHref] = useState("/login");
   const router = useRouter();
   const channel = useRef<BroadcastChannel | null>(null);
   const generation = useRef(0);
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [reload]);
   function accept(value: Account) {
+    setLoginHref("/login");
     generation.current++;
     setAccount(value);
     setStatus("ready");
@@ -84,8 +88,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace("/login");
     router.refresh();
   }
+  function passwordChanged() {
+    setLoginHref("/login?password=changed");
+    generation.current++;
+    setAccount(null);
+    setStatus("ready");
+    channel.current?.postMessage("changed");
+    router.replace("/login?password=changed");
+    router.refresh();
+  }
   return (
-    <AuthContext.Provider value={{ account, status, reload, accept, logout }}>
+    <AuthContext.Provider
+      value={{
+        account,
+        status,
+        reload,
+        accept,
+        logout,
+        passwordChanged,
+        loginHref,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -96,11 +119,11 @@ export function useAuth() {
   return value;
 }
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { account, status, reload } = useAuth();
+  const { account, status, reload, loginHref } = useAuth();
   const router = useRouter();
   useEffect(() => {
-    if (status === "ready" && !account) router.replace("/login");
-  }, [account, status, router]);
+    if (status === "ready" && !account) router.replace(loginHref);
+  }, [account, status, router, loginHref]);
   if (status === "error")
     return (
       <main className="session-state">
