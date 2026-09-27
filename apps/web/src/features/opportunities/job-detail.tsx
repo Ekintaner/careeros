@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Feedback } from "@/features/profile/form-ui";
 import { request, failure, safeUrl, date, label, type Job } from "./client";
 import { useResource } from "./lists";
+import { JobApplicationLink } from "@/features/applications/job-link";
 
 export function JobDetail({
   id,
@@ -84,6 +85,7 @@ export function JobDetail({
               )}
             </header>
             <div className="detail-actions">
+              <JobApplicationLink jobId={id} />
               <Link className="primary-button" href={`/jobs/${id}/edit`}>
                 Edit job
               </Link>

@@ -1,4 +1,6 @@
 using System.Net;
+using CareerOS.Api.Applications;
+using CareerOS.Infrastructure.Applications;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using CareerOS.Api.Authentication;
@@ -18,6 +20,7 @@ builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<OpportunityService>();
+builder.Services.AddScoped<ApplicationService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = context =>
@@ -52,7 +55,7 @@ app.Use(async (context, next) =>
     // Bounded product text can require six bytes per UTF-16 unit in escaped JSON. Auth retains 16 KiB.
     var limit = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
     var writing = context.Request.Method is "POST" or "PUT";
-    var product = context.Request.Path.StartsWithSegments("/api/v1/jobs") || context.Request.Path.StartsWithSegments("/api/v1/companies");
+    var product = context.Request.Path.StartsWithSegments("/api/v1/jobs") || context.Request.Path.StartsWithSegments("/api/v1/companies") || context.Request.Path.StartsWithSegments("/api/v1/applications");
     if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = writing && product ? 384 * 1024 :
         context.Request.Method == "PUT" && context.Request.Path.Equals("/api/v1/profile", StringComparison.OrdinalIgnoreCase) ? 128 * 1024 : 16 * 1024;
     await next(context);
@@ -79,6 +82,7 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 app.MapCareerAuth();
 app.MapCareerProfile();
 app.MapOpportunities();
+app.MapApplications();
 app.Run();
 
 static Task WriteHealthResponse(HttpContext context, HealthReport report) =>

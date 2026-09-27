@@ -20,7 +20,7 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented in CODEX-005:** owner-scoped company and job CRUD, bounded search/filter/sort lists, job detail, archive/restore and concurrency-safe restrictive deletion. See [companies and jobs](docs/companies-and-jobs.md).
 
-**Planned:** applications, resumes, interviews, tasks, documents and notifications; Kanban, parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
+**Planned:** resume management, interviews, tasks, documents and notifications; parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
 
 ## Zero-cost requirement
 
@@ -125,10 +125,14 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 3. CODEX-003 — authentication and server-enforced ownership (complete; production delivery/deployment remain separate).
 4. CODEX-004 — career profile, skills and account settings (complete).
 5. CODEX-005 — companies and opportunities (complete).
-6. CODEX-006 — application tracking.
+6. CODEX-006 — application tracking, pipeline and status history (complete).
 7. Document/resume workflows, interviews and follow-ups.
 8. Explainable matching, analytics and career intelligence.
 
 ## License
 
 [MIT](LICENSE).
+
+## Application tracking (CODEX-006)
+
+Track owned jobs as applications, manage a responsive pipeline, record status history and notes, attach existing resume metadata, and archive/restore without losing history. See [applications and pipeline](docs/applications-and-pipeline.md) and [CODEX-006 verification](docs/verification-codex006.md). No new dependency or paid service is required.

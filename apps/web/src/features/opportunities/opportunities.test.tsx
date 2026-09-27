@@ -66,6 +66,8 @@ beforeEach(() => {
     if (init?.method) return Promise.reject(new Error("Unexpected mutation"));
     if (path.startsWith("/api/v1/companies?")) return Promise.resolve(page([]));
     if (path.startsWith("/api/v1/jobs?")) return Promise.resolve(page([]));
+    if (path.startsWith("/api/v1/applications?"))
+      return Promise.resolve(page([]));
     if (path === "/api/v1/jobs/j") return Promise.resolve(job);
     return Promise.reject(new Error("Unexpected request"));
   });
@@ -259,7 +261,13 @@ it("shows real job details and a safe original posting link", async () => {
 it("archives jobs with their version and shows the restored action", async () => {
   render(<JobDetail id="j" />);
   await screen.findByRole("heading", { name: "Engineer" });
-  mocks.request.mockResolvedValue({ ...job, archivedAtUtc: job.createdAtUtc });
+  mocks.request.mockImplementation((path: string) =>
+    Promise.resolve(
+      path.startsWith("/api/v1/applications?")
+        ? page([])
+        : { ...job, archivedAtUtc: job.createdAtUtc },
+    ),
+  );
   fireEvent.click(screen.getByRole("button", { name: "Archive job" }));
   expect(
     await screen.findByRole("button", { name: "Restore job" }),

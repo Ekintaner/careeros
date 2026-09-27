@@ -312,7 +312,7 @@ namespace CareerOS.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_ApplicationStatusHistory_ToStatus_values", "\"ToStatus\" IN ('Saved', 'Applied', 'Assessment', 'Interview', 'Offer', 'Rejected', 'Withdrawn', 'Accepted', 'Archived')");
 
-                            t.HasCheckConstraint("CK_ApplicationStatusHistory_initial_or_transition", "(\"Sequence\" = 0 AND \"FromStatus\" IS NULL AND \"ToStatus\" = 'Saved') OR (\"Sequence\" > 0 AND \"FromStatus\" IS NOT NULL AND \"FromStatus\" <> \"ToStatus\")");
+                            t.HasCheckConstraint("CK_ApplicationStatusHistory_initial_or_transition", "(\"Sequence\" = 0 AND \"FromStatus\" IS NULL AND \"ToStatus\" IN ('Saved','Applied')) OR (\"Sequence\" > 0 AND \"FromStatus\" IS NOT NULL AND \"FromStatus\" <> \"ToStatus\")");
                         });
                 });
 

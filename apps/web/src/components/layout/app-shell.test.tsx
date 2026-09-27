@@ -18,7 +18,9 @@ describe("workspace shell", () => {
     expect(
       screen.getByRole("heading", { name: "Overview", level: 1 }),
     ).toBeVisible();
-    expect(screen.getByText("No applications to display")).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Open your application pipeline →" }),
+    ).toHaveAttribute("href", "/applications");
     const nav = within(
       screen.getByRole("navigation", { name: "Main navigation" }),
     );
@@ -26,7 +28,11 @@ describe("workspace shell", () => {
       "aria-current",
       "page",
     );
-    expect(nav.getByRole("button", { name: "Applications" })).toBeDisabled();
+    expect(nav.getByRole("link", { name: "Applications" })).toHaveAttribute(
+      "href",
+      "/applications",
+    );
+    expect(nav.getByRole("button", { name: "Interviews" })).toBeDisabled();
     expect(
       screen.getByRole("link", { name: "Skip to content" }),
     ).toHaveAttribute("href", "#main-content");

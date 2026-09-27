@@ -145,7 +145,7 @@ dotnet user-secrets set "Auth:Audience" "careeros-web" --project apps/api/src/Ca
 dotnet user-secrets set "Auth:SigningKey" "<base64-random-key>" --project apps/api/src/CareerOS.Api
 ```
 
-Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply all four migrations explicitly before using the workspace.
+Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply all five migrations explicitly before using the workspace.
 
 Set `API_INTERNAL_URL=http://localhost:5080` in apps/web/.env.local. This is server-only configuration; restart/rebuild Next after changing its rewrite destination. The browser uses same-origin `/api/v1`, not a public backend URL. Keep `Cors:AllowedOrigins` equal to the actual web origin (default http://localhost:3000). No cookies or credentials belong in NEXT_PUBLIC variables.
 
@@ -160,3 +160,7 @@ The existing PostgreSQL test switch now also runs authentication and complete tw
 Apply CompanyAndJobLifecycle with the existing EF update command. Start Compose, API and web using the commands above. Register or sign in, open /companies and add a company, then open /jobs to save an opportunity using that company. Search/filter controls submit server queries. Job details provide edit, archive/restore and restricted delete. A company with jobs cannot be deleted; archive a job when history must be retained. No seed data or external job provider is required.
 
 Keep the API and web terminal sessions running while using the preview at http://localhost:3000. API runs at http://localhost:5080; /health checks PostgreSQL and Redis. Stopping those sessions makes preview unavailable without indicating a code defect. After restarting, use the actual frontend port and ensure its origin is in the API CORS configuration.
+
+## Applications workflow (CODEX-006)
+
+Apply the migration chain with the existing EF update command. Open /applications after signing in. Track an existing job as Saved or Applied; stage controls persist a transition and history atomically. Job detail links to the existing application. Notes are plain text; resume choices include owned metadata only. Archive preserves history and Restore returns to the recorded previous status. No upload, seed user, new secret or paid dependency is required. See [applications and pipeline](applications-and-pipeline.md) for endpoint/query contracts and limitations.

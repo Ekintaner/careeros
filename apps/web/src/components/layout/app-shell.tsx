@@ -49,7 +49,9 @@ function Navigation() {
         >
           <h2>{group.title}</h2>
           {group.items.map((item) =>
-            item.icon === "jobs" || item.icon === "companies" ? (
+            item.icon === "jobs" ||
+            item.icon === "companies" ||
+            item.icon === "applications" ? (
               <NavigationLink key={item.label} href={`/${item.icon}`}>
                 <Icon name={item.icon} />
                 {item.label}

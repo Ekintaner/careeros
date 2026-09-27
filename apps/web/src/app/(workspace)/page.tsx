@@ -63,7 +63,9 @@ export default function OverviewPage() {
             <Icon name="applications" size={22} />
             <h3>Application pipeline</h3>
             <p>Keep the path from first interest to final decision in view.</p>
-            <div className="empty-message">No applications to display</div>
+            <Link className="back-link" href="/applications">
+              Open your application pipeline →
+            </Link>
           </article>
           <article>
             <Icon name="interviews" size={22} />

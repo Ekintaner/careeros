@@ -14,7 +14,7 @@ internal sealed class ApplicationStatusHistoryConfiguration : IEntityTypeConfigu
         Mapping.Enum<ApplicationStatusHistory, ApplicationStatus>(b, nameof(ApplicationStatusHistory.FromStatus), true);
         Mapping.Enum<ApplicationStatusHistory, ApplicationStatus>(b, nameof(ApplicationStatusHistory.ToStatus));
         b.Property(x => x.ChangedAtUtc).HasColumnType("timestamp with time zone").IsRequired();
-        Mapping.Check(b, "initial_or_transition", "(\"Sequence\" = 0 AND \"FromStatus\" IS NULL AND \"ToStatus\" = 'Saved') OR (\"Sequence\" > 0 AND \"FromStatus\" IS NOT NULL AND \"FromStatus\" <> \"ToStatus\")");
+        Mapping.Check(b, "initial_or_transition", "(\"Sequence\" = 0 AND \"FromStatus\" IS NULL AND \"ToStatus\" IN ('Saved','Applied')) OR (\"Sequence\" > 0 AND \"FromStatus\" IS NOT NULL AND \"FromStatus\" <> \"ToStatus\")");
         b.HasIndex(x => new { x.ApplicationId, x.Sequence }).IsUnique();
         b.HasIndex(x => new { x.ApplicationId, x.ChangedAtUtc, x.Sequence });
     }

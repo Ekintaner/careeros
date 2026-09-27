@@ -1,6 +1,6 @@
 # Core domain and PostgreSQL architecture
 
-CODEX-002 defines persistence and domain invariants; CODEX-003 adds credential/session persistence and server ownership boundaries. CODEX-004 implements profile/skills/account behavior; other product CRUD, matching, uploads and notification delivery remain deferred. No seed data is installed.
+CODEX-002 defines persistence and domain invariants; CODEX-003 adds credential/session persistence and server ownership boundaries. CODEX-004 implements profile/skills/account behavior; CODEX-005/006 implement companies, jobs and application tracking. Matching, uploads and notification delivery remain deferred. No seed data is installed.
 
 ## Entities and responsibilities
 
@@ -61,7 +61,7 @@ erDiagram
   resumes ||--o{ resume_skills : contains
 ```
 
-The diagram describes relational cardinality; application creation additionally requires an initial Saved history event through the domain constructor.
+The diagram describes relational cardinality; application creation additionally requires an initial Saved or Applied history event through the domain constructor.
 
 ## Ownership model
 
@@ -95,21 +95,9 @@ Enums are stored as readable strings with explicit CHECK lists, not PostgreSQL n
 
 ## Application history and workflow
 
-Creating a JobApplication records Saved at sequence 0 with FromStatus NULL. `TransitionTo` appends a history row, advances StatusRevision, records LastStatusChangedAtUtc, updates Status and records the first AppliedAtUtc. Equal server timestamps remain ordered by Sequence. Backwards server time, repeated states and unsupported transitions are rejected before mutation.
+Creating a JobApplication records its selected initial Saved or Applied status at sequence 0 with FromStatus NULL. `TransitionTo` appends a history row, advances StatusRevision, records LastStatusChangedAtUtc, updates Status and records the first AppliedAtUtc. Equal server timestamps remain ordered by Sequence. Backwards server time, repeated states and unsupported transitions are rejected before mutation.
 
-Supported transitions:
-
-| From                          | Allowed next states                                         |
-| ----------------------------- | ----------------------------------------------------------- |
-| Saved                         | Applied, Withdrawn, Archived                                |
-| Applied                       | Assessment, Interview, Offer, Rejected, Withdrawn, Archived |
-| Assessment                    | Interview, Offer, Rejected, Withdrawn, Archived             |
-| Interview                     | Assessment, Offer, Rejected, Withdrawn, Archived            |
-| Offer                         | Accepted, Rejected, Withdrawn, Archived                     |
-| Accepted, Rejected, Withdrawn | Archived                                                    |
-| Archived                      | None                                                        |
-
-Stage skips and repeated assessment/interview cycles are allowed, but reopening terminal states and importing historical/backdated events are not implemented. The app and newly created history are saved in one EF transaction. Sequence uniqueness and application concurrency detection reject races without leaving extra history events.
+CODEX-006 supports backward movement among Applied/Assessment/Interview/Offer, explicit terminal outcomes, archive and restore to the recorded pre-archive stage. See the complete [transition policy](applications-and-pipeline.md). Reopening terminal outcomes and importing backdated events remain deferred. Application changes and their new history event use one EF transaction; xmin and sequence uniqueness reject races without extra events.
 
 History exposes no mutation methods and DbContext rejects modifications/deletions. Database FK/check/unique constraints protect relationships and event shape; there is no trigger validating the entire event chain or synchronizing raw SQL status edits. Administrative SQL and bulk EF updates bypass aggregate behavior and must not be used for workflow changes. A later privileged erasure/import tool will need its own explicit audit policy.
 
@@ -142,7 +130,7 @@ No standalone timestamp index is added for an unscoped cross-user dashboard. Que
 
 ## Delete behavior
 
-Every FK uses RESTRICT. User deletion cannot cascade through career history. Companies with jobs, jobs with applications, documents used by resumes, resumes used by applications/skills, and applications/interviews with dependents cannot be silently deleted. No implicit SET NULL removes application context. Leaf rows can be explicitly removed except immutable status history through the normal DbContext. There is no generic soft-delete column or hidden global filter. Account erasure, retention and archiving workflows require deliberate implementation in later phases.
+Every FK uses RESTRICT. User deletion cannot cascade through career history. Companies with jobs, jobs with applications, documents used by resumes, resumes used by applications/skills, and applications/interviews with dependents cannot be silently deleted. No implicit SET NULL removes application context. Leaf rows can be explicitly removed except immutable status history through the normal DbContext. There is no generic soft-delete column or hidden global filter. Job/application archiving is implemented; account erasure and retention workflows remain deferred.
 
 ## Resume/document distinction
 
@@ -175,3 +163,7 @@ The generated migration is tested on a clean database, after InitialDomainSchema
 ## CODEX-005 lifecycle
 
 The generated 20260920101042_CompanyAndJobLifecycle migration adds nullable jobs.ArchivedAtUtc (timestamp with time zone). Existing jobs remain active; rollback removes only archive markers. Nineteen tables and existing indexes/RESTRICT ownership foreign keys remain intact. Company names still deliberately allow duplicates. Company/job services use owner-scoped projections, bounded offset pagination and xmin versions. See [companies and jobs](companies-and-jobs.md).
+
+## Application lifecycle migration (CODEX-006)
+
+20260927184616_ApplicationTrackingLifecycle broadens only the initial history CHECK from Saved to Saved/Applied. All 19 tables and existing ownership/sequence/expiry indexes remain. Rollback deliberately fails if direct-Applied initial events exist; do not fabricate history to force rollback. See [application persistence](applications-and-pipeline.md).

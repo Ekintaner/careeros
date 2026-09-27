@@ -66,3 +66,7 @@ See [authentication](authentication.md) for the architecture decision, complete 
 ## Companies and opportunities
 
 CODEX-005 implements the existing Company/Job entities through Application contracts, Infrastructure OpportunityService and an authenticated API endpoint module. Queries and mutations use OwnedData; bounded SQL projections and xmin protect list performance and concurrent editing. The frontend reuses the protected workspace and cookie client with dedicated forms and page-local state. Only a nullable job archive timestamp changes the schema. No new package or service is required. See [companies and jobs](companies-and-jobs.md).
+
+## Application tracking boundary
+
+CODEX-006 adds Application contracts, Infrastructure ApplicationService and authenticated API ApplicationEndpoints. Existing OwnedData, domain transitions, composite ownership keys and xmin remain authoritative. Next application pages reuse the auth client and shell; counts are SQL aggregates, not client-derived statistics. See [applications and pipeline](applications-and-pipeline.md).
