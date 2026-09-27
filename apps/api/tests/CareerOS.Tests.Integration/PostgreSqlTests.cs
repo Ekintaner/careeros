@@ -31,7 +31,7 @@ public sealed class PostgreSqlTests(PostgreSqlFixture fixture)
         Assert.True(await database.ScalarAsync<bool>("SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'job_applications' AND indexdef LIKE '%UNIQUE%' AND indexdef LIKE '%\"UserId\", \"JobId\"%')"));
         Assert.True(await database.ScalarAsync<bool>("SELECT EXISTS (SELECT 1 FROM pg_indexes WHERE tablename = 'application_status_history' AND indexdef LIKE '%\"ApplicationId\", \"ChangedAtUtc\", \"Sequence\"%')"));
         Assert.Equal(0L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND column_name LIKE '%Utc' AND data_type <> 'timestamp with time zone'"));
-        Assert.Equal(3, (await context.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Equal(4, (await context.Database.GetAppliedMigrationsAsync()).Count());
         await context.GetService<IMigrator>().MigrateAsync("0");
         Assert.Equal(0L, await database.ScalarAsync<long>("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name <> '__EFMigrationsHistory'"));
         await context.Database.MigrateAsync();

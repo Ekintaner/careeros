@@ -48,17 +48,24 @@ function Navigation() {
           aria-label={group.title}
         >
           <h2>{group.title}</h2>
-          {group.items.map((item) => (
-            <button
-              key={item.label}
-              className="nav-item"
-              disabled
-              title="Planned for a future release"
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </button>
-          ))}
+          {group.items.map((item) =>
+            item.icon === "jobs" || item.icon === "companies" ? (
+              <NavigationLink key={item.label} href={`/${item.icon}`}>
+                <Icon name={item.icon} />
+                {item.label}
+              </NavigationLink>
+            ) : (
+              <button
+                key={item.label}
+                className="nav-item"
+                disabled
+                title="Planned for a future release"
+              >
+                <Icon name={item.icon} />
+                {item.label}
+              </button>
+            ),
+          )}
         </section>
       ))}
       <div className="nav-footer">

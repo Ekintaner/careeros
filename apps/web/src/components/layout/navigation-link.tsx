@@ -8,7 +8,9 @@ export function NavigationLink({
   href: string;
   children: React.ReactNode;
 }) {
-  const current = usePathname() === href;
+  const path = usePathname();
+  const current =
+    path === href || (href !== "/" && path.startsWith(href + "/"));
   return (
     <Link
       href={href}
@@ -25,11 +27,15 @@ export function Breadcrumb() {
     <span className="breadcrumb">
       Workspace <span>/</span>{" "}
       <strong>
-        {path === "/profile"
-          ? "Career profile"
-          : path === "/settings"
-            ? "Settings"
-            : "Overview"}
+        {path.startsWith("/companies")
+          ? "Companies"
+          : path.startsWith("/jobs")
+            ? "Jobs"
+            : path === "/profile"
+              ? "Career profile"
+              : path === "/settings"
+                ? "Settings"
+                : "Overview"}
       </strong>
     </span>
   );

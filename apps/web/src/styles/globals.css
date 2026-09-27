@@ -834,6 +834,209 @@ h1 {
   }
 }
 
+/* Compact opportunity lists reuse the workspace's editor controls. */
+.back-link {
+  display: inline-block;
+  color: var(--color-accent);
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+.page-heading > a {
+  flex-shrink: 0;
+}
+.list-filters {
+  padding: 20px 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 12px;
+}
+.list-filters > .editor-field {
+  max-width: 480px;
+}
+.list-filters details {
+  margin: 12px 0;
+}
+.list-filters summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-accent);
+  padding: 8px 0;
+}
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 20px;
+  padding: 12px 0;
+}
+.filter-actions,
+.detail-actions,
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.filter-actions .text-button {
+  margin: 0;
+}
+.record-list {
+  border-bottom: 1px solid var(--color-line);
+}
+.company-row,
+.job-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 24px;
+  align-items: center;
+  padding: 22px 4px;
+  border-bottom: 1px solid var(--color-line);
+}
+.company-row:last-child,
+.job-row:last-child {
+  border-bottom: 0;
+}
+.record-list h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.record-list h2 a:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.record-list p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.record-list .company-caption {
+  font-size: 11px;
+  margin-bottom: 5px;
+  color: var(--color-accent);
+}
+.record-count,
+.record-open,
+.row-actions {
+  color: var(--color-accent);
+  font-size: 12px;
+}
+.row-actions .text-button {
+  padding: 6px 0;
+  margin: 0;
+}
+.job-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  color: var(--color-muted);
+  font-size: 11px;
+  max-width: 200px;
+  overflow-wrap: anywhere;
+}
+.list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.list-pagination > div {
+  display: flex;
+  gap: 8px;
+}
+.company-picker {
+  min-width: 0;
+}
+.company-picker a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.job-heading h1 {
+  overflow-wrap: anywhere;
+}
+.detail-actions {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--color-line);
+}
+.danger-text {
+  color: #912e26;
+}
+.job-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  padding: 28px 0;
+  margin: 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.job-facts dt {
+  font-size: 11px;
+  color: var(--color-muted);
+  margin-bottom: 7px;
+}
+.job-facts dd {
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.job-description {
+  padding: 24px 0;
+}
+.job-description h2 {
+  font-size: 17px;
+}
+.job-description p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.85;
+  font-size: 14px;
+}
+@media (max-width: 1100px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .page-heading {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .filter-grid,
+  .job-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .company-row,
+  .job-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+  }
+  .job-row-meta {
+    grid-column: 1;
+    align-items: flex-start;
+    max-width: none;
+  }
+  .record-open {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .company-row .row-actions {
+    grid-column: 1 / -1;
+  }
+  .list-pagination {
+    flex-wrap: wrap;
+  }
+  .detail-actions {
+    gap: 12px;
+  }
+}
+
 /* Account pages use the workspace palette and typography. */
 .auth-page {
   min-height: 100dvh;

@@ -10,7 +10,7 @@ dotnet restore apps/api/CareerOS.sln --locked-mode
 dotnet tool restore
 ```
 
-Copy `.env.example` to `.env` yourself and replace its password placeholder. The agent does not create a secrets file. On PowerShell use `Copy-Item .env.example .env`; on POSIX use `cp .env.example .env`. Start Docker Desktop/Engine, then:
+Copy `.env.example` to `.env` yourself and replace its password placeholder. Keep this local secrets file ignored by Git. On PowerShell use `Copy-Item .env.example .env`; on POSIX use `cp .env.example .env`. Start Docker Desktop/Engine, then:
 
 ```sh
 docker compose up -d --wait
@@ -23,7 +23,7 @@ Configure local secrets using a password you chose for Compose (replace `<local-
 
 ```sh
 dotnet user-secrets set "ConnectionStrings:PostgreSql" "Host=localhost;Port=5432;Database=careeros;Username=careeros;Password=<local-password>" --project apps/api/src/CareerOS.Api
-dotnet user-secrets set "ConnectionStrings:Redis" "localhost:6379" --project apps/api/src/CareerOS.Api
+dotnet user-secrets set "ConnectionStrings:Redis" "127.0.0.1:6379" --project apps/api/src/CareerOS.Api
 dotnet run --project apps/api/src/CareerOS.Api
 ```
 
@@ -145,7 +145,7 @@ dotnet user-secrets set "Auth:Audience" "careeros-web" --project apps/api/src/Ca
 dotnet user-secrets set "Auth:SigningKey" "<base64-random-key>" --project apps/api/src/CareerOS.Api
 ```
 
-Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply all three migrations explicitly before using the workspace.
+Default lifetimes are five minutes for access and 30 days absolute for refresh. Set Auth**AccessTokenMinutes/Auth**RefreshTokenDays to override within validated limits. Missing critical authentication settings fail startup, including Development; no fallback signing key or user is invented. Apply all four migrations explicitly before using the workspace.
 
 Set `API_INTERNAL_URL=http://localhost:5080` in apps/web/.env.local. This is server-only configuration; restart/rebuild Next after changing its rewrite destination. The browser uses same-origin `/api/v1`, not a public backend URL. Keep `Cors:AllowedOrigins` equal to the actual web origin (default http://localhost:3000). No cookies or credentials belong in NEXT_PUBLIC variables.
 
@@ -154,3 +154,9 @@ Register through /register, then Overview shows the account. Logout revokes its 
 Production requires Secure cookies/HTTPS origins and a real secret manager; configure AllowedHosts and a trusted ingress before exposure. Do not trust arbitrary forwarded headers. See the proxy, throttling, delivery and retention requirements in [authentication](authentication.md).
 
 The existing PostgreSQL test switch now also runs authentication and complete two-user ownership tests. Test signing keys/passwords are generated or test-only; no default authentication bypass exists in the application. The generated auth migration can be inspected with the same EF commands above.
+
+## Companies/jobs workflow (CODEX-005)
+
+Apply CompanyAndJobLifecycle with the existing EF update command. Start Compose, API and web using the commands above. Register or sign in, open /companies and add a company, then open /jobs to save an opportunity using that company. Search/filter controls submit server queries. Job details provide edit, archive/restore and restricted delete. A company with jobs cannot be deleted; archive a job when history must be retained. No seed data or external job provider is required.
+
+Keep the API and web terminal sessions running while using the preview at http://localhost:3000. API runs at http://localhost:5080; /health checks PostgreSQL and Redis. Stopping those sessions makes preview unavailable without indicating a code defect. After restarting, use the actual frontend port and ensure its origin is in the API CORS configuration.

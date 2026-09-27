@@ -62,3 +62,7 @@ The shell remains a server component with small client active-navigation compone
 ## Authentication design
 
 See [authentication](authentication.md) for the architecture decision, complete contracts, hashing/token lifetimes, replay handling, browser cookie/CSRF strategy, ownership conventions and operational limits. The existing User is preserved; Identity's password hasher and JwtBearer are reused without introducing a second IdentityUser. Infrastructure orchestrates persistent sessions/reset tokens; no production email provider or verification endpoints are claimed.
+
+## Companies and opportunities
+
+CODEX-005 implements the existing Company/Job entities through Application contracts, Infrastructure OpportunityService and an authenticated API endpoint module. Queries and mutations use OwnedData; bounded SQL projections and xmin protect list performance and concurrent editing. The frontend reuses the protected workspace and cookie client with dedicated forms and page-local state. Only a nullable job archive timestamp changes the schema. No new package or service is required. See [companies and jobs](companies-and-jobs.md).

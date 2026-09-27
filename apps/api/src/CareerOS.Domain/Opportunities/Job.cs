@@ -29,10 +29,22 @@ public sealed class Job : IAuditedEntity
     public SalaryPeriod? SalaryPeriod { get; private set; }
     public DateTime? PostedAtUtc { get; private set; }
     public DateTime? ExpiresAtUtc { get; private set; }
+    public DateTime? ArchivedAtUtc { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime UpdatedAtUtc { get; private set; }
 
     public void Rename(string title) => Title = Rules.Required(title, 200, nameof(title));
+
+    public void ChangeCompany(Company company)
+    {
+        Rules.SameOwner(UserId, company.UserId);
+        CompanyId = company.Id;
+    }
+
+    public void SetArchived(bool archived, TimeProvider clock)
+    {
+        ArchivedAtUtc = archived ? ArchivedAtUtc ?? clock.GetUtcNow().UtcDateTime : null;
+    }
 
     public void Describe(string? description, string? location, WorkMode? workMode, EmploymentType? employmentType, SeniorityLevel? seniorityLevel)
     {

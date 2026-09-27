@@ -29,6 +29,7 @@ internal sealed class JobConfiguration : IEntityTypeConfiguration<Job>
         Mapping.Check(b, "salary_metadata", "((\"SalaryMin\" IS NOT NULL OR \"SalaryMax\" IS NOT NULL) AND \"SalaryCurrency\" IS NOT NULL AND \"SalaryCurrency\" ~ '^[A-Z]{3}$' AND \"SalaryPeriod\" IS NOT NULL) OR (\"SalaryMin\" IS NULL AND \"SalaryMax\" IS NULL AND \"SalaryCurrency\" IS NULL AND \"SalaryPeriod\" IS NULL)");
         b.Property(x => x.PostedAtUtc).HasColumnType("timestamp with time zone");
         b.Property(x => x.ExpiresAtUtc).HasColumnType("timestamp with time zone");
+        b.Property(x => x.ArchivedAtUtc).HasColumnType("timestamp with time zone");
         Mapping.Check(b, "posting_order", "\"ExpiresAtUtc\" >= \"PostedAtUtc\"");
         b.HasIndex(x => new { x.UserId, x.CreatedAtUtc });
         b.HasIndex(x => new { x.UserId, x.PostedAtUtc });

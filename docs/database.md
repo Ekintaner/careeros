@@ -171,3 +171,7 @@ Coverage includes migration/apply/rollback/reapply, schema/index inspection, all
 Two tables bring the total to 19: refresh_tokens (one hashed generation per rotation, user/family/replacement metadata) and password_reset_tokens (hashed expiring single-use tokens). Both have unique hash and expiry indexes and RESTRICT ownership FKs. Refresh replacements use a composite user/family/ID FK; CHECKs enforce digest shape, expiry/revocation ordering and replacement revocation. No raw persistent token, user-agent or IP is stored. See [authentication](authentication.md) for locking, absolute expiry, replay and retention requirements.
 
 The generated migration is tested on a clean database, after InitialDomainSchema containing an existing user, on rollback to InitialDomainSchema, on complete rollback and on reapplication. InitialDomainSchema remains unchanged.
+
+## CODEX-005 lifecycle
+
+The generated 20260920101042_CompanyAndJobLifecycle migration adds nullable jobs.ArchivedAtUtc (timestamp with time zone). Existing jobs remain active; rollback removes only archive markers. Nineteen tables and existing indexes/RESTRICT ownership foreign keys remain intact. Company names still deliberately allow duplicates. Company/job services use owner-scoped projections, bounded offset pagination and xmin versions. See [companies and jobs](companies-and-jobs.md).
