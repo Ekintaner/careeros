@@ -86,3 +86,11 @@ CODEX-010 adds Application planning contracts, Infrastructure PlanningService, a
 ## Analytics and reporting
 
 CODEX-011 adds authenticated aggregate reporting under /api/v1/analytics and /analytics, using a consistent PostgreSQL snapshot, owned queries and parameterized stage-duration SQL. See [metric definitions and limitations](analytics-and-reporting.md).
+
+## Optional local AI assistance
+
+CODEX-012 adds strict Application assistance contracts/grounding validation, Infrastructure owned snapshot assembly and an optional loopback-only Ollama transport, authenticated/rate-limited API endpoints and a protected job-context screen. Disabled AI performs no provider I/O; no migration, AI SDK, cloud provider or persistent output is added. Deterministic matching and Skills Intelligence remain independent. The permanent product contract is zero mandatory financial cost. See [local AI design, setup, privacy and limits](local-ai-assistance.md).
+
+## Product overview
+
+CODEX-013 adds an authenticated owner-scoped dashboard snapshot using seven bounded-count/list queries in a repeatable-read PostgreSQL transaction, and shared presentation/focus/modal/navigation improvements. No schema or analytics/matching definition changes. See [verification](verification-codex013.md) and [presentation system](design-system.md).

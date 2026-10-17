@@ -14,6 +14,11 @@ export function NavigationLink({
   return (
     <Link
       href={href}
+      onClick={(event) => {
+        event.currentTarget
+          .closest("details.mobile-nav")
+          ?.removeAttribute("open");
+      }}
       className={`nav-item${current ? " active" : ""}`}
       aria-current={current ? "page" : undefined}
     >

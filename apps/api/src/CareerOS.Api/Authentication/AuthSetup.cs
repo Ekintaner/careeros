@@ -92,7 +92,7 @@ public static class AuthSetup
                 context.HttpContext.Response.Headers.RetryAfter = "60";
                 await Results.Problem(statusCode: 429, title: "Too many attempts. Try again shortly.").ExecuteAsync(context.HttpContext);
             };
-            foreach (var (name, permits) in new[] { ("credentials", 10), ("recovery", 5), ("refresh", 60) })
+            foreach (var (name, permits) in new[] { ("credentials", 10), ("recovery", 5), ("refresh", 60), ("local-ai", 6), ("local-ai-status", 30) })
                 options.AddPolicy(name, context => RateLimitPartition.GetFixedWindowLimiter(
                     context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new FixedWindowRateLimiterOptions
                     { PermitLimit = permits, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true }));

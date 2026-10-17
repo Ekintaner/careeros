@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import "@/styles/globals.css";
 import "@/styles/applications.css";
+import "@/styles/product.css";
 
 export const metadata: Metadata = {
   title: { default: "Overview · CareerOS", template: "%s · CareerOS" },

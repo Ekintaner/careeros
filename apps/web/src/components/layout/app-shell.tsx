@@ -85,7 +85,7 @@ function Navigation() {
         <p>
           Your career workspace
           <br />
-          <span>More tools coming soon</span>
+          <span>Built around your search</span>
         </p>
       </div>
     </>

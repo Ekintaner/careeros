@@ -28,6 +28,8 @@ internal sealed class AuthFactory(string connection, bool capture = true, string
             ["ConnectionStrings:PostgreSql"] = connection,
             ["ConnectionStrings:Redis"] = "127.0.0.1:1,connectTimeout=500,asyncTimeout=500",
             ["Documents:StorageRoot"] = DocumentRoot,
+            ["LocalAi:Enabled"] = "false",
+            ["LocalAi:Model"] = "",
             ["Auth:Issuer"] = "tests",
             ["Auth:Audience"] = "tests",
             ["Auth:SigningKey"] = SigningKey,

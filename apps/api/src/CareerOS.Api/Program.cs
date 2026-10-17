@@ -1,3 +1,7 @@
+using CareerOS.Infrastructure.Dashboard;
+using CareerOS.Api.Assistance;
+using CareerOS.Application.Assistance;
+using CareerOS.Infrastructure.Assistance;
 using CareerOS.Api.Analytics;
 using CareerOS.Infrastructure.Analytics;
 using CareerOS.Api.Planning;
@@ -33,10 +37,13 @@ builder.Services.AddScoped<OpportunityService>();
 builder.Services.AddScoped<ApplicationService>();
 builder.Services.AddScoped<PlanningService>();
 builder.Services.AddScoped<AnalyticsService>();
+builder.Services.AddScoped<DashboardService>();
 builder.Services.AddSingleton(_ => new LocalDocumentStore(builder.Configuration, builder.Environment.ContentRootPath));
 builder.Services.AddScoped<DocumentService>();
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<IntelligenceService>();
+builder.Services.AddSingleton<ILocalAiProvider>(_ => new LocalAiProvider(LocalAiOptions.Read(builder.Configuration), LocalAiProvider.CreateClient()));
+builder.Services.AddScoped<AssistanceService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = context =>
@@ -101,9 +108,11 @@ app.MapOpportunities();
 app.MapApplications();
 app.MapPlanning();
 app.MapAnalytics();
+app.MapGet("/api/v1/dashboard", (DashboardService service, CancellationToken ct) => service.Get(ct)).RequireAuthorization().WithTags("Dashboard");
 app.MapDocuments();
 app.MapMatching();
 app.MapIntelligence();
+app.MapAssistance();
 app.Run();
 
 static Task WriteHealthResponse(HttpContext context, HealthReport report) =>

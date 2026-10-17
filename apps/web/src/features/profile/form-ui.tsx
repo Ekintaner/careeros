@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useRef } from "react";
+import {
+  useEffect,
+  useRef,
+  isValidElement,
+  cloneElement,
+  type ReactElement,
+} from "react";
 
 export function Feedback({
   error,
@@ -54,7 +60,32 @@ export function Field({
   return (
     <div className="editor-field">
       <label htmlFor={id}>{title}</label>
-      {children}
+      {isValidElement(children) &&
+      typeof children.type === "string" &&
+      ["input", "select", "textarea"].includes(children.type)
+        ? cloneElement(children as ReactElement<Record<string, unknown>>, {
+            id: (children.props as Record<string, unknown>).id ?? id,
+            "aria-invalid": error
+              ? true
+              : (children.props as Record<string, unknown>)["aria-invalid"],
+            "aria-describedby":
+              [
+                ...new Set(
+                  [
+                    String(
+                      (children.props as Record<string, unknown>)[
+                        "aria-describedby"
+                      ] ?? "",
+                    ),
+                    error || hint ? `${id}-hint` : "",
+                  ]
+                    .join(" ")
+                    .split(/\s+/)
+                    .filter(Boolean),
+                ),
+              ].join(" ") || undefined,
+          })
+        : children}
       {(error || hint) && (
         <p id={`${id}-hint`} className={error ? "field-error" : "field-hint"}>
           {error || hint}

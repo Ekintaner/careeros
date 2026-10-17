@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "./app-shell";
-import OverviewPage from "@/app/(workspace)/page";
+
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 vi.mock("@/features/auth/auth-provider", () => ({
@@ -9,10 +10,11 @@ vi.mock("@/features/auth/auth-provider", () => ({
 }));
 
 describe("workspace shell", () => {
-  it("shows an honest overview and marks future tools unavailable", () => {
+  it("exposes available navigation and overview landmarks", () => {
     render(
       <AppShell>
-        <OverviewPage />
+        <h1>Overview</h1>
+        <Link href="/applications">Open your application pipeline →</Link>
       </AppShell>,
     );
     expect(

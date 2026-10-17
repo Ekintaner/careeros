@@ -149,3 +149,7 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 Track owned jobs as applications, manage a responsive pipeline, record status history and notes, attach existing resume metadata, and archive/restore without losing history. See [applications and pipeline](docs/applications-and-pipeline.md) and [CODEX-006 verification](docs/verification-codex006.md). No new dependency or paid service is required.
 
 CODEX-011: [Analytics and reporting](docs/analytics-and-reporting.md) is available at /analytics with date/time-zone filters, recorded conversion, trends, completed stage durations and planning metrics. No paid provider or new migration.
+
+CODEX-012 (local, awaiting submission approval): [Optional local AI assistance](docs/local-ai-assistance.md) from saved job details. Disabled by default; local-only Ollama verification, grounded excerpts and recorded-evidence suggestions. CareerOS retains zero mandatory financial cost without AI.
+
+CODEX-013 adds a real owner-scoped Overview and consistent responsive presentation. See [UI verification](docs/verification-codex013.md) and [design system](docs/design-system.md).

@@ -395,3 +395,32 @@ it("preserves a conflicting note draft and requires reload", async () => {
   expect(screen.getByRole("button", { name: "Add note" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Reload notes" })).toBeEnabled();
 });
+it("mobile Kanban keeps every stage selectable and requests only the selected column", async () => {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  try {
+    mocks.request.mockImplementation(reads);
+    render(<ApplicationsPage />);
+    const chooser = screen.getByLabelText("Pipeline stage");
+    expect(within(chooser).getAllByRole("option")).toHaveLength(5);
+    await screen.findByRole("region", { name: "Saved applications" });
+    expect(
+      screen.queryByRole("region", { name: "Applied applications" }),
+    ).toBeNull();
+    fireEvent.change(chooser, { target: { value: "Applied" } });
+    await screen.findByRole("region", { name: "Applied applications" });
+    expect(
+      screen.queryByRole("region", { name: "Saved applications" }),
+    ).toBeNull();
+    expect(
+      mocks.request.mock.calls.filter(([path]) =>
+        path.includes("/applications?"),
+      ),
+    ).toHaveLength(2);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

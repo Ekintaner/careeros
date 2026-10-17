@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useState, useSyncExternalStore, type FormEvent } from "react";
 import Link from "next/link";
 import { Field, Feedback } from "@/features/profile/form-ui";
 import { useResource } from "@/features/opportunities/lists";
@@ -15,6 +15,17 @@ import {
 } from "./client";
 import { StatusControl } from "./status-control";
 
+const stageMedia = "(max-width: 1100px)";
+function subscribeToWidth(change: () => void) {
+  if (typeof window.matchMedia !== "function") return () => {};
+  const media = window.matchMedia(stageMedia);
+  media.addEventListener("change", change);
+  return () => media.removeEventListener("change", change);
+}
+const compactSnapshot = () =>
+  typeof window.matchMedia === "function" &&
+  window.matchMedia(stageMedia).matches;
+const serverSnapshot = () => true;
 function Column({
   status,
   query,
@@ -81,6 +92,11 @@ function Column({
   );
 }
 export function ApplicationsPage() {
+  const compact = useSyncExternalStore(
+    subscribeToWidth,
+    compactSnapshot,
+    serverSnapshot,
+  );
   const [attempt, setAttempt] = useState(0);
   const [view, setView] = useState("pipeline");
   const [mobile, setMobile] = useState<Status>("Saved");
@@ -102,7 +118,7 @@ export function ApplicationsPage() {
       : view === "outcomes"
         ? outcomes
         : ["Archived"];
-  const selected = visible.includes(mobile) ? mobile : visible[0];
+  const selected = visible.includes(mobile) ? mobile : (visible[0] ?? "Saved");
   function apply(e: FormEvent) {
     e.preventDefault();
     const q = new URLSearchParams({ search, sort });
@@ -251,9 +267,12 @@ export function ApplicationsPage() {
       </div>
       <div
         className={`pipeline-board ${view !== "pipeline" ? "outcome-board" : ""}`}
+        role="region"
+        aria-label="Application pipeline columns"
+        tabIndex={0}
         key={`${query}:${attempt}:${view}`}
       >
-        {visible.map((s) => (
+        {(compact ? [selected] : visible).map((s) => (
           <div
             key={s}
             className={

@@ -6,6 +6,7 @@ import { request, failure, type Page } from "@/features/opportunities/client";
 import { Field, Feedback } from "@/features/profile/form-ui";
 import { Pagination } from "@/features/opportunities/shared";
 import "./documents.css";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export interface DocumentItem {
   id: string;
@@ -108,7 +109,7 @@ export function DocumentsPage({ resumes = false }: { resumes?: boolean }) {
           {resumes ? "All documents" : "Manage resumes"}
         </Link>
       </header>
-      <Feedback error={error} success={success} />
+      <Feedback error={pending ? undefined : error} success={success} />
       {error && (
         <button
           className="text-button"
@@ -318,41 +319,19 @@ export function DocumentsPage({ resumes = false }: { resumes?: boolean }) {
         </section>
       </div>
       {pending && (
-        <section
-          className="document-confirm"
-          role="alertdialog"
-          aria-modal="false"
-          aria-labelledby="delete-title"
-        >
-          <h2 id="delete-title">Delete {pending.name}?</h2>
-          <p>
-            This permanently removes the file and its metadata.
-            {pending.isPrimary &&
-              " Your library will have no primary resume until you select another."}
-          </p>
-          <div className="document-actions">
-            <button
-              autoFocus
-              disabled={busy}
-              className="secondary-button"
-              onClick={() => setPending(undefined)}
-            >
-              Cancel
-            </button>
-            <button
-              disabled={busy}
-              className="primary-button"
-              onClick={() =>
-                action(
-                  () => request(`documents/${pending.id}`, "DELETE"),
-                  "Document deleted.",
-                )
-              }
-            >
-              Permanently delete
-            </button>
-          </div>
-        </section>
+        <ConfirmDialog
+          title={`Delete ${pending.name}?`}
+          description={`This permanently removes the file and its metadata.${pending.isPrimary ? " Your library will have no primary resume until you select another." : ""}`}
+          error={error}
+          busy={busy}
+          onCancel={() => setPending(undefined)}
+          onConfirm={() =>
+            action(
+              () => request(`documents/${pending.id}`, "DELETE"),
+              "Document deleted.",
+            )
+          }
+        />
       )}
     </div>
   );

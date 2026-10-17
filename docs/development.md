@@ -176,3 +176,11 @@ Start the usual PostgreSQL/Redis/API/web stack; no new migration or configuratio
 ## Analytics (CODEX-011)
 
 Use /analytics after signing in. Calendar filters use IANA zones (for example Europe/Kyiv); UTC is the default. See [metric definitions](analytics-and-reporting.md) and [verification](verification-codex011.md). Existing PostgreSQL test switches include analytics integration tests. No additional migration or package is needed.
+
+## Optional local AI (CODEX-012)
+
+Leave LocalAi:Enabled false to use every core feature without an inference server. Optional manual Ollama setup, cloud-disabled preflight requirements, hardware caveats and protocol-test boundaries are documented in [local AI assistance](local-ai-assistance.md). No model installation or download is part of startup/build/tests. Existing PostgreSQL test switches discover the new assistance ownership/security tests.
+
+## Product UI verification (CODEX-013)
+
+The Overview now reads /api/v1/dashboard. Existing test switches include dashboard ownership and time-boundary checks. No additional setup or migration is required. See [verification and limitations](verification-codex013.md) and [shared presentation conventions](design-system.md).

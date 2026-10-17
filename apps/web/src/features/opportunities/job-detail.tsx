@@ -87,6 +87,12 @@ export function JobDetail({
             </header>
             <div className="detail-actions">
               <JobApplicationLink jobId={id} />
+              <Link
+                className="secondary-button"
+                href={`/jobs/${id}/assistance`}
+              >
+                Optional local AI assistance
+              </Link>
               <Link className="primary-button" href={`/jobs/${id}/edit`}>
                 Edit job
               </Link>
