@@ -50,6 +50,9 @@ function Navigation() {
         >
           <h2>{group.title}</h2>
           {group.items.map((item) =>
+            item.icon === "analytics" ||
+            item.icon === "interviews" ||
+            item.icon === "tasks" ||
             item.icon === "skills" ||
             item.icon === "jobs" ||
             item.icon === "companies" ||

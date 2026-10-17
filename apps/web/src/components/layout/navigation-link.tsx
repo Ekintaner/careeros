@@ -27,23 +27,29 @@ export function Breadcrumb() {
     <span className="breadcrumb">
       Workspace <span>/</span>{" "}
       <strong>
-        {path.startsWith("/skills")
-          ? "Skills intelligence"
-          : path.startsWith("/applications")
-            ? "Applications"
-            : path.startsWith("/companies")
-              ? "Companies"
-              : path.startsWith("/jobs")
-                ? "Jobs"
-                : path.startsWith("/resumes")
-                  ? "Resumes"
-                  : path.startsWith("/documents")
-                    ? "Documents"
-                    : path === "/profile"
-                      ? "Career profile"
-                      : path === "/settings"
-                        ? "Settings"
-                        : "Overview"}
+        {path.startsWith("/analytics")
+          ? "Analytics"
+          : path.startsWith("/interviews")
+            ? "Interviews"
+            : path.startsWith("/tasks")
+              ? "Tasks"
+              : path.startsWith("/skills")
+                ? "Skills intelligence"
+                : path.startsWith("/applications")
+                  ? "Applications"
+                  : path.startsWith("/companies")
+                    ? "Companies"
+                    : path.startsWith("/jobs")
+                      ? "Jobs"
+                      : path.startsWith("/resumes")
+                        ? "Resumes"
+                        : path.startsWith("/documents")
+                          ? "Documents"
+                          : path === "/profile"
+                            ? "Career profile"
+                            : path === "/settings"
+                              ? "Settings"
+                              : "Overview"}
       </strong>
     </span>
   );

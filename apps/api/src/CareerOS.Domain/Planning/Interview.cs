@@ -28,6 +28,8 @@ public sealed class Interview : IAuditedEntity
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime UpdatedAtUtc { get; private set; }
 
+    public void ChangeType(InterviewType type) => Type = Rules.EnumValue(type);
+
     public void Reschedule(DateTime startUtc, DateTime endUtc)
     {
         Rules.Utc(startUtc);

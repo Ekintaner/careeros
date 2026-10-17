@@ -168,3 +168,11 @@ Apply the migration chain with the existing EF update command. Open /application
 ## Documents/resumes workflow (CODEX-007)
 
 No additional migration or dependency is required. The default private file root is LocalApplicationData/CareerOS/documents, outside the repository. Optionally configure an absolute `Documents__StorageRoot` outside Git and the application directory. Restrict OS permissions to the API account. Start the usual local stack, sign in, then use /documents or /resumes. PDF files are limited to 5 MiB. See [storage, deletion and paired backup/restore](documents-and-resumes.md).
+
+## Interviews and tasks (CODEX-010)
+
+Start the usual PostgreSQL/Redis/API/web stack; no new migration or configuration is required. Open /interviews or /tasks after signing in. Schedule against an existing application, keep private interview notes, and create standalone or application-linked follow-ups. Use the overdue and upcoming views to plan the next step. The editor names the device timezone and offers UTC entry. See [contracts and limitations](interviews-and-tasks.md).
+
+## Analytics (CODEX-011)
+
+Use /analytics after signing in. Calendar filters use IANA zones (for example Europe/Kyiv); UTC is the default. See [metric definitions](analytics-and-reporting.md) and [verification](verification-codex011.md). Existing PostgreSQL test switches include analytics integration tests. No additional migration or package is needed.

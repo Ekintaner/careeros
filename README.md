@@ -24,6 +24,8 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented in CODEX-008:** deterministic job versus career profile or confirmed resume skill matching, weighted score breakdown, matched/missing evidence, and manual job/resume skill editors. See [matching rules and limits](docs/resume-job-matching.md).
 
+**Implemented in CODEX-010:** owner-scoped interview scheduling/details/notes, application-linked or standalone tasks, due dates, priorities, completion/reopening and upcoming/overdue views. See [contracts and limitations](docs/interviews-and-tasks.md).
+
 **Implemented in CODEX-009:** current saved-job skill demand, distinct profile/resume evidence gaps, explained learning priorities, paginated job drilldowns and responsive Skills intelligence. See [rules and limitations](docs/skills-intelligence.md).
 
 **Planned:** interviews, tasks and notifications; parsing, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
@@ -135,7 +137,8 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 7. CODEX-007 — resume and document management (complete).
 8. CODEX-008 — deterministic resume/job skill matching (complete).
 9. CODEX-009 — skills intelligence and skill gap analytics (complete).
-10. Further phases, including interviews and follow-ups (not started).
+10. CODEX-010 — interview scheduling, notes and career follow-up tasks (implemented locally; commit/push approval pending).
+11. Further phases, including interviews and follow-ups (not started).
 
 ## License
 
@@ -144,3 +147,5 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 ## Application tracking (CODEX-006)
 
 Track owned jobs as applications, manage a responsive pipeline, record status history and notes, attach existing resume metadata, and archive/restore without losing history. See [applications and pipeline](docs/applications-and-pipeline.md) and [CODEX-006 verification](docs/verification-codex006.md). No new dependency or paid service is required.
+
+CODEX-011: [Analytics and reporting](docs/analytics-and-reporting.md) is available at /analytics with date/time-zone filters, recorded conversion, trends, completed stage durations and planning metrics. No paid provider or new migration.

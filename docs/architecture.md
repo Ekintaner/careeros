@@ -78,3 +78,11 @@ CODEX-008 reuses the existing canonical vocabulary and owner-scoped JobSkill/Res
 ## Skills intelligence
 
 CODEX-009 adds a read-only aggregate slice under `/api/v1/intelligence/skills` and a protected `/skills` page. PostgreSQL groups only the current owner's structured job requirements, joins owned profile/resume evidence and returns bounded pages. Matching weights and rounding come from CODEX-008. Current skill demand, profile coverage and evidence/learning priorities are explained without inventing history or skill claims. See [skills intelligence](skills-intelligence.md).
+
+## Interview and task planning
+
+CODEX-010 adds Application planning contracts, Infrastructure PlanningService, authenticated PlanningEndpoints and protected interview/task pages. Existing ownership keys, xmin, scheduling/note/task models and tables remain authoritative; no migration or new dependency is needed. See [interviews and tasks](interviews-and-tasks.md).
+
+## Analytics and reporting
+
+CODEX-011 adds authenticated aggregate reporting under /api/v1/analytics and /analytics, using a consistent PostgreSQL snapshot, owned queries and parameterized stage-duration SQL. See [metric definitions and limitations](analytics-and-reporting.md).

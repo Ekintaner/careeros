@@ -71,13 +71,17 @@ export default function OverviewPage() {
             <Icon name="interviews" size={22} />
             <h3>Upcoming interviews</h3>
             <p>Give every conversation the preparation it deserves.</p>
-            <div className="empty-message">No interviews to display</div>
+            <Link className="back-link" href="/interviews">
+              Open your interview schedule →
+            </Link>
           </article>
           <article>
             <Icon name="analytics" size={22} />
             <h3>Job-search insights</h3>
             <p>Find patterns in your progress as your workspace grows.</p>
-            <div className="empty-message">Insights need real activity</div>
+            <Link className="back-link" href="/analytics">
+              View your recorded progress →
+            </Link>
           </article>
         </div>
       </section>

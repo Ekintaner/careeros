@@ -330,6 +330,16 @@ function LoadedDetail({
             <span className="application-status">{a.status}</span>
           </header>
           <div className="detail-actions">
+            <Link href={`/interviews?applicationId=${a.id}`}>Interviews</Link>
+            <Link href={`/interviews/new?applicationId=${a.id}`}>
+              Schedule interview
+            </Link>
+            <Link href={`/tasks?applicationId=${a.id}`}>Follow-up tasks</Link>
+            <Link href={`/tasks/new?applicationId=${a.id}`}>
+              New follow-up task
+            </Link>
+          </div>
+          <div className="detail-actions">
             <Link className="primary-button" href={`/applications/${id}/edit`}>
               Edit application
             </Link>

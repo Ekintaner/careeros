@@ -1,0 +1,81 @@
+.analytics-page {
+  max-width: 1200px;
+}
+.analytics-page > form {
+  padding: 20px;
+  border: 1px solid var(--border, #d9dfdf);
+  border-radius: 14px;
+  align-items: end;
+}
+.analytics-page label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.85rem;
+  flex: 1 1 150px;
+}
+.analytics-page input,
+.analytics-page select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #aab8bc;
+  border-radius: 8px;
+  background: white;
+  color: #20343b;
+}
+.analytics-page button {
+  padding: 11px 18px;
+  border-radius: 8px;
+  background: #183e49;
+  color: white;
+  cursor: pointer;
+}
+.analytics-page :focus-visible {
+  outline: 3px solid #4169e1;
+  outline-offset: 3px;
+}
+.analytics-panel {
+  background: white;
+  border: 1px solid var(--border, #d9dfdf);
+  border-radius: 14px;
+}
+.analytics-panel h2 {
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+}
+.analytics-panel p {
+  line-height: 1.65;
+  margin-block: 12px;
+}
+.analytics-panel th,
+.analytics-panel td {
+  padding: 10px 6px;
+  border-bottom: 1px solid #e7eded;
+  text-align: left;
+}
+.analytics-panel th {
+  font-size: 0.85rem;
+}
+.analytics-panel td {
+  font-variant-numeric: tabular-nums;
+}
+.analytics-page > p {
+  line-height: 1.65;
+  margin-block: 16px;
+}
+@media (max-width: 600px) {
+  .analytics-page {
+    padding-inline: 16px;
+  }
+  .analytics-panel {
+    overflow-wrap: anywhere;
+  }
+}
+
+.analytics-page .page-heading {
+  display: block;
+}
+.analytics-page .page-heading h1 {
+  margin-block: 10px;
+}

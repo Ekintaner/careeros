@@ -25,6 +25,7 @@ export function Pagination({
       </span>
       <div>
         <button
+          type="button"
           className="secondary-button"
           disabled={busy || page <= 1}
           onClick={() => onPage(page - 1)}
@@ -32,6 +33,7 @@ export function Pagination({
           Previous
         </button>
         <button
+          type="button"
           className="secondary-button"
           disabled={busy || page >= pages}
           onClick={() => onPage(page + 1)}

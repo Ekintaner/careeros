@@ -1,3 +1,7 @@
+using CareerOS.Api.Analytics;
+using CareerOS.Infrastructure.Analytics;
+using CareerOS.Api.Planning;
+using CareerOS.Infrastructure.Planning;
 using CareerOS.Api.Intelligence;
 using CareerOS.Infrastructure.Intelligence;
 using CareerOS.Api.Matching;
@@ -27,6 +31,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<OpportunityService>();
 builder.Services.AddScoped<ApplicationService>();
+builder.Services.AddScoped<PlanningService>();
+builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddSingleton(_ => new LocalDocumentStore(builder.Configuration, builder.Environment.ContentRootPath));
 builder.Services.AddScoped<DocumentService>();
 builder.Services.AddScoped<MatchingService>();
@@ -65,7 +71,7 @@ app.Use(async (context, next) =>
     // Bounded product text can require six bytes per UTF-16 unit in escaped JSON. Auth retains 16 KiB.
     var limit = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
     var writing = context.Request.Method is "POST" or "PUT";
-    var product = context.Request.Path.StartsWithSegments("/api/v1/jobs") || context.Request.Path.StartsWithSegments("/api/v1/companies") || context.Request.Path.StartsWithSegments("/api/v1/applications") || context.Request.Path.StartsWithSegments("/api/v1/resumes");
+    var product = context.Request.Path.StartsWithSegments("/api/v1/interviews") || context.Request.Path.StartsWithSegments("/api/v1/tasks") || context.Request.Path.StartsWithSegments("/api/v1/jobs") || context.Request.Path.StartsWithSegments("/api/v1/companies") || context.Request.Path.StartsWithSegments("/api/v1/applications") || context.Request.Path.StartsWithSegments("/api/v1/resumes");
     if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = context.Request.Method == "POST" && context.Request.Path.Equals("/api/v1/documents", StringComparison.OrdinalIgnoreCase) ? LocalDocumentStore.MaxBytes : writing && product ? 384 * 1024 :
         context.Request.Method == "PUT" && context.Request.Path.Equals("/api/v1/profile", StringComparison.OrdinalIgnoreCase) ? 128 * 1024 : 16 * 1024;
     await next(context);
@@ -93,6 +99,8 @@ app.MapCareerAuth();
 app.MapCareerProfile();
 app.MapOpportunities();
 app.MapApplications();
+app.MapPlanning();
+app.MapAnalytics();
 app.MapDocuments();
 app.MapMatching();
 app.MapIntelligence();

@@ -1,0 +1,91 @@
+.planning-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 38px 40px 56px;
+}
+.planning-page > h1 {
+  margin: 24px 0;
+}
+.planning-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 20px 0;
+}
+.planning-card {
+  padding: 24px;
+  background: white;
+  border: 1px solid var(--border, #dce2dc);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.planning-card h2 {
+  font-size: 18px;
+}
+.planning-card p {
+  line-height: 1.6;
+}
+.planning-form {
+  max-width: 760px;
+  margin-top: 24px;
+}
+.planning-form fieldset {
+  min-width: 0;
+  border: 1px solid var(--border, #dce2dc);
+  border-radius: 10px;
+  padding: 24px;
+}
+.planning-form legend {
+  padding: 0 8px;
+  font-weight: 600;
+}
+.planning-form input,
+.planning-form select,
+.planning-form textarea {
+  max-width: 100%;
+}
+.planning-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+.planning-check input {
+  width: auto;
+}
+@media (max-width: 650px) {
+  .planning-grid {
+    grid-template-columns: 1fr;
+  }
+  .planning-form fieldset {
+    padding: 14px;
+  }
+}
+.planning-page > .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.planning-page h1 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+  margin-bottom: 12px;
+}
+.planning-page > .page-header p {
+  line-height: 1.7;
+}
+.planning-page > .page-header > a {
+  flex-shrink: 0;
+}
+@media (max-width: 650px) {
+  .planning-page {
+    padding: 24px 20px 40px;
+  }
+  .planning-page > .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
