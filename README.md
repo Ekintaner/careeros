@@ -20,7 +20,9 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented in CODEX-005:** owner-scoped company and job CRUD, bounded search/filter/sort lists, job detail, archive/restore and concurrency-safe restrictive deletion. See [companies and jobs](docs/companies-and-jobs.md).
 
-**Planned:** resume management, interviews, tasks, documents and notifications; parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
+**Implemented in CODEX-007:** authenticated owner-scoped PDF documents and resumes, local private storage, downloads, restricted deletion, primary resume selection and application assignment. See [documents and resumes](docs/documents-and-resumes.md).
+
+**Planned:** interviews, tasks and notifications; parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
 
 ## Zero-cost requirement
 
@@ -126,8 +128,9 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 4. CODEX-004 — career profile, skills and account settings (complete).
 5. CODEX-005 — companies and opportunities (complete).
 6. CODEX-006 — application tracking, pipeline and status history (complete).
-7. Document/resume workflows, interviews and follow-ups.
-8. Explainable matching, analytics and career intelligence.
+7. CODEX-007 — resume and document management (complete).
+8. Interviews and follow-ups.
+9. Explainable matching, analytics and career intelligence.
 
 ## License
 

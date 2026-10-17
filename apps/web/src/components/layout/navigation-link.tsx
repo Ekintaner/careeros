@@ -33,11 +33,15 @@ export function Breadcrumb() {
             ? "Companies"
             : path.startsWith("/jobs")
               ? "Jobs"
-              : path === "/profile"
-                ? "Career profile"
-                : path === "/settings"
-                  ? "Settings"
-                  : "Overview"}
+              : path.startsWith("/resumes")
+                ? "Resumes"
+                : path.startsWith("/documents")
+                  ? "Documents"
+                  : path === "/profile"
+                    ? "Career profile"
+                    : path === "/settings"
+                      ? "Settings"
+                      : "Overview"}
       </strong>
     </span>
   );

@@ -1,3 +1,5 @@
+using CareerOS.Api.Documents;
+using CareerOS.Infrastructure.Documents;
 using System.Net;
 using CareerOS.Api.Applications;
 using CareerOS.Infrastructure.Applications;
@@ -14,13 +16,15 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 384 * 1024);
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = LocalDocumentStore.MaxBytes);
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<OpportunityService>();
 builder.Services.AddScoped<ApplicationService>();
+builder.Services.AddSingleton(_ => new LocalDocumentStore(builder.Configuration, builder.Environment.ContentRootPath));
+builder.Services.AddScoped<DocumentService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = context =>
@@ -56,7 +60,7 @@ app.Use(async (context, next) =>
     var limit = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
     var writing = context.Request.Method is "POST" or "PUT";
     var product = context.Request.Path.StartsWithSegments("/api/v1/jobs") || context.Request.Path.StartsWithSegments("/api/v1/companies") || context.Request.Path.StartsWithSegments("/api/v1/applications");
-    if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = writing && product ? 384 * 1024 :
+    if (limit is { IsReadOnly: false }) limit.MaxRequestBodySize = context.Request.Method == "POST" && context.Request.Path.Equals("/api/v1/documents", StringComparison.OrdinalIgnoreCase) ? LocalDocumentStore.MaxBytes : writing && product ? 384 * 1024 :
         context.Request.Method == "PUT" && context.Request.Path.Equals("/api/v1/profile", StringComparison.OrdinalIgnoreCase) ? 128 * 1024 : 16 * 1024;
     await next(context);
 });
@@ -83,6 +87,7 @@ app.MapCareerAuth();
 app.MapCareerProfile();
 app.MapOpportunities();
 app.MapApplications();
+app.MapDocuments();
 app.Run();
 
 static Task WriteHealthResponse(HttpContext context, HealthReport report) =>

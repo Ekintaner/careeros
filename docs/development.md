@@ -164,3 +164,7 @@ Keep the API and web terminal sessions running while using the preview at http:/
 ## Applications workflow (CODEX-006)
 
 Apply the migration chain with the existing EF update command. Open /applications after signing in. Track an existing job as Saved or Applied; stage controls persist a transition and history atomically. Job detail links to the existing application. Notes are plain text; resume choices include owned metadata only. Archive preserves history and Restore returns to the recorded previous status. No upload, seed user, new secret or paid dependency is required. See [applications and pipeline](applications-and-pipeline.md) for endpoint/query contracts and limitations.
+
+## Documents/resumes workflow (CODEX-007)
+
+No additional migration or dependency is required. The default private file root is LocalApplicationData/CareerOS/documents, outside the repository. Optionally configure an absolute `Documents__StorageRoot` outside Git and the application directory. Restrict OS permissions to the API account. Start the usual local stack, sign in, then use /documents or /resumes. PDF files are limited to 5 MiB. See [storage, deletion and paired backup/restore](documents-and-resumes.md).

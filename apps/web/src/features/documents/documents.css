@@ -1,0 +1,125 @@
+.documents-page {
+  max-width: 1280px;
+  margin: auto;
+  padding: 38px 40px 56px;
+}
+.documents-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.documents-heading h1 {
+  margin: 0.25rem 0 0.6rem;
+}
+.documents-heading p {
+  color: var(--text-muted, #64748b);
+}
+.documents-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.document-upload,
+.document-library,
+.document-confirm {
+  padding: 1.5rem;
+  border: 1px solid var(--border, #dce3e9);
+  border-radius: 16px;
+  background: var(--surface, white);
+  min-width: 0;
+}
+.document-upload h2,
+.document-library h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+.document-upload fieldset {
+  border: 0;
+  padding: 0;
+  margin: 1.5rem 0;
+  min-width: 0;
+}
+.document-upload input,
+.document-upload select,
+.document-library select {
+  width: 100%;
+  min-width: 0;
+}
+.document-upload input[type="file"] {
+  padding: 0.8rem 0.4rem;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+}
+.document-cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+.document-card {
+  border: 1px solid var(--border, #dce3e9);
+  border-radius: 12px;
+  padding: 1.25rem;
+  overflow-wrap: anywhere;
+}
+.document-card h3 {
+  margin: 0.6rem 0;
+  font-size: 1.05rem;
+}
+.document-kind {
+  font-size: 0.75rem;
+  color: #475569;
+  letter-spacing: 0.04em;
+}
+.document-filename {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+.primary-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 6px;
+}
+.document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.document-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+.document-confirm {
+  margin-top: 1.5rem;
+  border-color: #b45309;
+}
+@media (max-width: 900px) {
+  .documents-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .documents-page {
+    padding: 24px 16px 40px;
+  }
+  .document-upload,
+  .document-library {
+    padding: 1rem;
+  }
+  .document-actions > * {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}

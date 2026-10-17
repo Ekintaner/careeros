@@ -14,6 +14,12 @@ internal sealed class AuthFactory(string connection, bool capture = true, string
 {
     public string SigningKey { get; } = signingKey ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     public TestClock Clock { get; } = new();
+    public string DocumentRoot { get; } = Path.Combine(Path.GetTempPath(), "careeros-doc-test-" + Guid.NewGuid().ToString("N"));
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing && Directory.Exists(DocumentRoot)) Directory.Delete(DocumentRoot, true);
+    }
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(production ? "Production" : "Development");
@@ -21,6 +27,7 @@ internal sealed class AuthFactory(string connection, bool capture = true, string
         {
             ["ConnectionStrings:PostgreSql"] = connection,
             ["ConnectionStrings:Redis"] = "127.0.0.1:1,connectTimeout=500,asyncTimeout=500",
+            ["Documents:StorageRoot"] = DocumentRoot,
             ["Auth:Issuer"] = "tests",
             ["Auth:Audience"] = "tests",
             ["Auth:SigningKey"] = SigningKey,
@@ -47,7 +54,8 @@ internal sealed class Browser(HttpClient client, string origin = "http://localho
         using var request = new HttpRequestMessage(method ?? HttpMethod.Get, "/api/v1/" + path);
         if (csrf) { request.Headers.Add("Origin", origin); request.Headers.Add("X-CareerOS-CSRF", "1"); }
         if (Cookies.Count > 0) request.Headers.Add("Cookie", string.Join("; ", Cookies.Select(x => $"{x.Key}={x.Value}")));
-        if (body is not null) request.Content = JsonContent.Create(body);
+        if (body is HttpContent content) request.Content = content;
+        else if (body is not null) request.Content = JsonContent.Create(body);
         return await client.SendAsync(request);
     }
     public async Task<HttpResponseMessage> Send(string path, object? body = null, bool post = true, bool csrf = true, string? forwardedFor = null)
@@ -56,7 +64,8 @@ internal sealed class Browser(HttpClient client, string origin = "http://localho
         if (csrf) { request.Headers.Add("Origin", origin); request.Headers.Add("X-CareerOS-CSRF", "1"); }
         if (forwardedFor is not null) request.Headers.Add("X-Forwarded-For", forwardedFor);
         if (Cookies.Count > 0) request.Headers.Add("Cookie", string.Join("; ", Cookies.Select(x => $"{x.Key}={x.Value}")));
-        if (body is not null) request.Content = JsonContent.Create(body);
+        if (body is HttpContent content) request.Content = content;
+        else if (body is not null) request.Content = JsonContent.Create(body);
         var response = await client.SendAsync(request);
         if (response.Headers.TryGetValues("Set-Cookie", out var values))
             foreach (var value in values) { var pair = value.Split(';')[0].Split('=', 2); if (pair[1] == "") Cookies.Remove(pair[0]); else Cookies[pair[0]] = pair[1]; }
