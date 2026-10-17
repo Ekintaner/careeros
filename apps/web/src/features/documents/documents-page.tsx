@@ -247,9 +247,12 @@ export function DocumentsPage({ resumes = false }: { resumes?: boolean }) {
                         setError("");
                         try {
                           await authClient().request("/api/v1/auth/me");
-                          window.location.assign(
-                            `/api/v1/documents/${d.id}/download`,
-                          );
+                          const download = document.createElement("a");
+                          download.href = `/api/v1/documents/${d.id}/download`;
+                          download.download = d.originalFileName;
+                          document.body.append(download);
+                          download.click();
+                          download.remove();
                         } catch (e) {
                           setError(failure(e));
                         }
