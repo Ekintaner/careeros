@@ -9,6 +9,10 @@ import type { Company, Job } from "./client";
 const mocks = vi.hoisted(() => ({ request: vi.fn(), push: vi.fn() }));
 vi.mock("@/features/auth/auth-client", () => ({ authClient: () => mocks }));
 vi.mock("next/navigation", () => ({ useRouter: () => mocks }));
+// Matching has its own read/write/error contract suite; keep opportunity mocks focused.
+vi.mock("@/features/matching/matching-panel", () => ({
+  MatchingPanel: () => null,
+}));
 const company: Company = {
   id: "c",
   name: "Example company",

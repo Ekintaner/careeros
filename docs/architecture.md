@@ -70,3 +70,11 @@ CODEX-005 implements the existing Company/Job entities through Application contr
 ## Application tracking boundary
 
 CODEX-006 adds Application contracts, Infrastructure ApplicationService and authenticated API ApplicationEndpoints. Existing OwnedData, domain transitions, composite ownership keys and xmin remain authoritative. Next application pages reuse the auth client and shell; counts are SQL aggregates, not client-derived statistics. See [applications and pipeline](applications-and-pipeline.md).
+
+## Deterministic skill matching
+
+CODEX-008 reuses the existing canonical vocabulary and owner-scoped JobSkill/ResumeSkill/UserSkill relationships. Application owns pure deterministic scoring and validated contracts, Infrastructure owns snapshot queries and atomic xmin-protected set replacement, and API maps authenticated matching routes. The job detail UI exposes source selection, score contributions, evidence timestamps and manual requirement/evidence editors. There is no PDF parsing, inferred resume skill, new migration, external provider or persisted score. See [matching rules and limitations](resume-job-matching.md).
+
+## Skills intelligence
+
+CODEX-009 adds a read-only aggregate slice under `/api/v1/intelligence/skills` and a protected `/skills` page. PostgreSQL groups only the current owner's structured job requirements, joins owned profile/resume evidence and returns bounded pages. Matching weights and rounding come from CODEX-008. Current skill demand, profile coverage and evidence/learning priorities are explained without inventing history or skill claims. See [skills intelligence](skills-intelligence.md).

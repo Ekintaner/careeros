@@ -18,6 +18,7 @@ const groups: { title: string; items: { label: string; icon: IconName }[] }[] =
       title: "Career",
       items: [
         { label: "Resumes", icon: "resumes" },
+        { label: "Skills intelligence", icon: "skills" },
         { label: "Analytics", icon: "analytics" },
       ],
     },
@@ -49,6 +50,7 @@ function Navigation() {
         >
           <h2>{group.title}</h2>
           {group.items.map((item) =>
+            item.icon === "skills" ||
             item.icon === "jobs" ||
             item.icon === "companies" ||
             item.icon === "resumes" ||

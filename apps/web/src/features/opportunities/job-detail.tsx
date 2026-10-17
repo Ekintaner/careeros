@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { MatchingPanel } from "@/features/matching/matching-panel";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Feedback } from "@/features/profile/form-ui";
@@ -114,6 +115,7 @@ export function JobDetail({
                 Delete job
               </button>
             </div>
+            <MatchingPanel key={id} jobId={id} />
             <dl className="job-facts">
               {(
                 [

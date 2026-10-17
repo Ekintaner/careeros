@@ -32,6 +32,9 @@ describe("workspace shell", () => {
       "href",
       "/applications",
     );
+    expect(
+      nav.getByRole("link", { name: "Skills intelligence" }),
+    ).toHaveAttribute("href", "/skills");
     expect(nav.getByRole("button", { name: "Interviews" })).toBeDisabled();
     expect(
       screen.getByRole("link", { name: "Skip to content" }),

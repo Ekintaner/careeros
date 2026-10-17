@@ -22,7 +22,11 @@ Connect opportunities, application progress, career documents and actionable ins
 
 **Implemented in CODEX-007:** authenticated owner-scoped PDF documents and resumes, local private storage, downloads, restricted deletion, primary resume selection and application assignment. See [documents and resumes](docs/documents-and-resumes.md).
 
-**Planned:** interviews, tasks and notifications; parsing, explainable matching, skill gaps, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
+**Implemented in CODEX-008:** deterministic job versus career profile or confirmed resume skill matching, weighted score breakdown, matched/missing evidence, and manual job/resume skill editors. See [matching rules and limits](docs/resume-job-matching.md).
+
+**Implemented in CODEX-009:** current saved-job skill demand, distinct profile/resume evidence gaps, explained learning priorities, paginated job drilldowns and responsive Skills intelligence. See [rules and limitations](docs/skills-intelligence.md).
+
+**Planned:** interviews, tasks and notifications; parsing, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
 
 ## Zero-cost requirement
 
@@ -129,8 +133,9 @@ Pushes to `main` and pull requests run frontend installation, formatting, lint, 
 5. CODEX-005 — companies and opportunities (complete).
 6. CODEX-006 — application tracking, pipeline and status history (complete).
 7. CODEX-007 — resume and document management (complete).
-8. Interviews and follow-ups.
-9. Explainable matching, analytics and career intelligence.
+8. CODEX-008 — deterministic resume/job skill matching (complete).
+9. CODEX-009 — skills intelligence and skill gap analytics (complete).
+10. Further phases, including interviews and follow-ups (not started).
 
 ## License
 
