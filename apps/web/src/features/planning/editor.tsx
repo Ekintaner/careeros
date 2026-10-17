@@ -304,8 +304,8 @@ function EditorForm({
     <>
       <Feedback error={error} success={success} />
       <p className="field-hint">
-        Displayed times: {deviceZone}. Saved as UTC. No calendar invitations are
-        sent.
+        Lists show times in {deviceZone}. Enter times below in the selected
+        timezone. Saved as UTC. No calendar invitations are sent.
       </p>
       <form
         className="planning-form"
@@ -359,7 +359,11 @@ function EditorForm({
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </Field>
-              <Field id="task-due" title="Due date and time (optional)">
+              <Field
+                id="task-due"
+                title="Due date and time (optional)"
+                hint={`Enter a complete date and time in ${basis === "UTC" ? "UTC" : deviceZone}. For repeated daylight-saving times, use UTC.`}
+              >
                 <input
                   id="task-due"
                   type="datetime-local"
@@ -401,7 +405,11 @@ function EditorForm({
                 </select>
               </Field>
               <div className="planning-grid">
-                <Field id="interview-start" title="Start">
+                <Field
+                  id="interview-start"
+                  title="Start"
+                  hint={`Enter a complete date and time in ${basis === "UTC" ? "UTC" : deviceZone}. For repeated daylight-saving times, use UTC.`}
+                >
                   <input
                     id="interview-start"
                     type="datetime-local"
@@ -410,7 +418,11 @@ function EditorForm({
                     onChange={(e) => setStart(e.target.value)}
                   />
                 </Field>
-                <Field id="interview-end" title="End">
+                <Field
+                  id="interview-end"
+                  title="End"
+                  hint={`Enter a complete date and time in ${basis === "UTC" ? "UTC" : deviceZone}. End must be after start.`}
+                >
                   <input
                     id="interview-end"
                     type="datetime-local"

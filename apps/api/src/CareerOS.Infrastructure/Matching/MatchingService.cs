@@ -25,7 +25,8 @@ public sealed class MatchingService(CareerOSDbContext db, OwnedData owned, TimeP
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, ct);
         var jobVersion = await owned.Query<Job>().AsNoTracking().Where(x => x.Id == jobId)
             .Select(x => (uint?)EF.Property<uint>(x, "Version")).SingleOrDefaultAsync(ct) ?? throw new MatchingNotFoundException();
-        var requirements = await (from r in owned.Query<JobSkill>() where r.JobId == jobId
+        var requirements = await (from r in owned.Query<JobSkill>()
+                                  where r.JobId == jobId
                                   join s in db.Skills on r.SkillId equals s.Id
                                   select new MatchRequirement(s.Id, s.Name, r.RequirementLevel.ToString())).ToArrayAsync(ct);
         ResumeSkillsView? resume = null;
@@ -38,7 +39,8 @@ public sealed class MatchingService(CareerOSDbContext db, OwnedData owned, TimeP
         else
         {
             var ids = requirements.Select(x => x.SkillId).ToArray();
-            evidence = await (from r in owned.Query<UserSkill>() where ids.Contains(r.SkillId)
+            evidence = await (from r in owned.Query<UserSkill>()
+                              where ids.Contains(r.SkillId)
                               join s in db.Skills on r.SkillId equals s.Id
                               select new SkillEvidence(s.Id, s.Name, r.UpdatedAtUtc)).ToArrayAsync(ct);
         }
@@ -50,18 +52,30 @@ public sealed class MatchingService(CareerOSDbContext db, OwnedData owned, TimeP
     {
         var resume = await owned.Query<Resume>().AsNoTracking().Where(x => x.Id == id)
             .Select(x => new { x.Id, x.Name, Version = EF.Property<uint>(x, "Version") }).SingleOrDefaultAsync(ct) ?? throw new MatchingNotFoundException();
-        var skills = await (from r in owned.Query<ResumeSkill>() where r.ResumeId == id
-                            join s in db.Skills on r.SkillId equals s.Id orderby s.NormalizedName
+        var skills = await (from r in owned.Query<ResumeSkill>()
+                            where r.ResumeId == id
+                            join s in db.Skills on r.SkillId equals s.Id
+                            orderby s.NormalizedName
                             select new SkillEvidence(s.Id, s.Name, r.CreatedAtUtc)).ToArrayAsync(ct);
         return new(id, resume.Name, resume.Version, skills);
     }
-    private async Task<Skill> Canonical(string name, CancellationToken ct)
+    private async Task<Dictionary<string, Skill>> Canonical(IEnumerable<string> names, CancellationToken ct)
     {
-        var skill = new Skill(name);
+        var skills = names.Select(name => new Skill(name)).OrderBy(x => x.NormalizedName, StringComparer.Ordinal).ToArray();
+        if (skills.Length == 0) return new(StringComparer.Ordinal);
+        var ids = skills.Select(x => x.Id).ToArray();
+        var labels = skills.Select(x => x.Name).ToArray();
+        var normalized = skills.Select(x => x.NormalizedName).ToArray();
         var now = clock.GetUtcNow().UtcDateTime;
-        // Shared vocabulary only; this does not assert a user/profile/resume skill.
-        await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO skills (\"Id\", \"Name\", \"CreatedAtUtc\", \"UpdatedAtUtc\") VALUES ({skill.Id}, {skill.Name}, {now}, {now}) ON CONFLICT (\"NormalizedName\") DO NOTHING", ct);
-        return await db.Skills.AsNoTracking().SingleAsync(x => x.NormalizedName == skill.NormalizedName, ct);
+        // Parameterized arrays; deterministic conflict lock order for competing vocabulary writers.
+        // READ COMMITTED's next statement sees a concurrent insert after ON CONFLICT has waited.
+        await db.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO skills ("Id", "Name", "CreatedAtUtc", "UpdatedAtUtc")
+            SELECT s.id, s.name, {now}, {now} FROM unnest({ids}::uuid[], {labels}::text[]) AS s(id, name)
+            ORDER BY translate(btrim(s.name), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') COLLATE "C"
+            ON CONFLICT ("NormalizedName") DO NOTHING
+            """, ct);
+        return await db.Skills.AsNoTracking().Where(x => normalized.Contains(x.NormalizedName)).ToDictionaryAsync(x => x.NormalizedName, StringComparer.Ordinal, ct);
     }
     public async Task SaveJob(Guid id, JobSkillsInput input, CancellationToken ct)
     {
@@ -73,10 +87,10 @@ public sealed class MatchingService(CareerOSDbContext db, OwnedData owned, TimeP
         await owned.SaveChangesAsync(ct);
         var existing = await owned.Query<JobSkill>().Where(x => x.JobId == id).ToListAsync(ct);
         var keep = new HashSet<Guid>();
-        // Sort insertion order to avoid deadlocks between shared vocabulary writers.
+        var vocabulary = await Canonical(skills.Select(x => x.Name), ct);
         foreach (var item in skills.OrderBy(x => new Skill(x.Name).NormalizedName, StringComparer.Ordinal))
         {
-            var canonical = await Canonical(item.Name, ct);
+            var canonical = vocabulary[new Skill(item.Name).NormalizedName];
             keep.Add(canonical.Id);
             var relation = existing.SingleOrDefault(x => x.SkillId == canonical.Id);
             var level = Enum.Parse<RequirementLevel>(item.RequirementLevel);
@@ -98,9 +112,10 @@ public sealed class MatchingService(CareerOSDbContext db, OwnedData owned, TimeP
         await owned.SaveChangesAsync(ct);
         var existing = await owned.Query<ResumeSkill>().Where(x => x.ResumeId == id).ToListAsync(ct);
         var keep = new HashSet<Guid>();
+        var vocabulary = await Canonical(names, ct);
         foreach (var name in names.OrderBy(x => new Skill(x).NormalizedName, StringComparer.Ordinal))
         {
-            var canonical = await Canonical(name, ct);
+            var canonical = vocabulary[new Skill(name).NormalizedName];
             keep.Add(canonical.Id);
             if (existing.All(x => x.SkillId != canonical.Id)) owned.Add(new ResumeSkill(resume, canonical.Id));
         }

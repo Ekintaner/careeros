@@ -44,10 +44,22 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
     {
         if (container is not null) await container.DisposeAsync();
     }
+
+    internal async Task DumpRestoreAsync(TestDatabase source, TestDatabase restored)
+    {
+        if (container is null) throw new InvalidOperationException("Backup drill requires the disposable Testcontainers server.");
+        var user = new NpgsqlConnectionStringBuilder(connectionString).Username!;
+        var file = "/tmp/" + source.DatabaseName + ".dump";
+        var dump = await container.ExecAsync(["pg_dump", "-U", user, "-d", source.DatabaseName, "-Fc", "-f", file]);
+        if (dump.ExitCode != 0) throw new InvalidOperationException("Synthetic pg_dump failed.");
+        var restore = await container.ExecAsync(["pg_restore", "-U", user, "-d", restored.DatabaseName, "--exit-on-error", "--no-owner", "--no-acl", file]);
+        if (restore.ExitCode != 0) throw new InvalidOperationException("Synthetic pg_restore failed.");
+    }
 }
 
 public sealed class TestDatabase(string adminConnection, string connectionString, string databaseName) : IAsyncDisposable
 {
+    internal string DatabaseName => databaseName;
     public string ConnectionString => connectionString;
     public CareerOSDbContext Context(TimeProvider? clock = null) => new(
         new DbContextOptionsBuilder<CareerOSDbContext>().UseNpgsql(connectionString).Options, clock);

@@ -21,6 +21,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
@@ -37,6 +38,7 @@ jobs:
         with:
           global-json-file: global.json
       - run: dotnet restore apps/api/CareerOS.sln --locked-mode
+      - run: dotnet format apps/api/CareerOS.sln --verify-no-changes --no-restore
       - run: dotnet build apps/api/CareerOS.sln --configuration Release --no-restore
       - run: dotnet test apps/api/CareerOS.sln --configuration Release --no-build --logger trx
       - uses: actions/upload-artifact@v4
@@ -50,3 +52,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose --env-file .env.example config --quiet
+      - name: Start clean infrastructure
+        env:
+          POSTGRES_PASSWORD: ci-disposable-only-password
+        run: docker compose up -d --wait
+      - name: Verify database and Redis
+        env:
+          POSTGRES_PASSWORD: ci-disposable-only-password
+        run: |
+          docker compose exec -T postgres psql -U careeros -d careeros -c 'SELECT 1'
+          docker compose exec -T redis redis-cli ping
+      - name: Stop disposable infrastructure
+        if: always()
+        env:
+          POSTGRES_PASSWORD: ci-disposable-only-password
+        run: docker compose down

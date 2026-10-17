@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api-client";
 import { authClient, type Account } from "./auth-client";
+import { loginDestination, safeReturnTo } from "./return-to";
 
 type AuthState = {
   account: Account | null;
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => {
     authClient().setOnExpired(() => {
+      generation.current++;
       setAccount(null);
       setStatus("ready");
     });
@@ -122,7 +124,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const { account, status, reload, loginHref } = useAuth();
   const router = useRouter();
   useEffect(() => {
-    if (status === "ready" && !account) router.replace(loginHref);
+    if (status === "ready" && !account)
+      router.replace(
+        loginDestination(
+          window.location.pathname +
+            window.location.search +
+            window.location.hash,
+          loginHref,
+        ),
+      );
   }, [account, status, router, loginHref]);
   if (status === "error")
     return (
@@ -140,15 +150,16 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     );
   return children;
 }
-export function SessionRecovery() {
+export function SessionRecovery({ returnTo }: { returnTo?: string }) {
   const { account, status, reload } = useAuth();
   const router = useRouter();
   useEffect(() => {
     if (status === "ready") {
-      router.replace(account ? "/" : "/login");
+      const target = safeReturnTo(returnTo) + window.location.hash;
+      router.replace(account ? safeReturnTo(target) : loginDestination(target));
       router.refresh();
     }
-  }, [account, status, router]);
+  }, [account, status, router, returnTo]);
   return (
     <main className="session-state">
       <p role="status">

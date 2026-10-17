@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api-client";
 import { authClient, type Account } from "./auth-client";
 import { useAuth } from "./auth-provider";
 import { validateAuth, type AuthMode } from "./validation";
+import { safeReturnTo } from "./return-to";
 const copy = {
   login: ["Welcome back", "Sign in to your CareerOS workspace.", "Sign in"],
   register: [
@@ -27,9 +28,11 @@ const copy = {
 export function AuthForm({
   mode,
   passwordChanged = false,
+  returnTo,
 }: {
   mode: AuthMode;
   passwordChanged?: boolean;
+  returnTo?: string;
 }) {
   const { account, status, accept, reload } = useAuth();
   const router = useRouter();
@@ -46,6 +49,10 @@ export function AuthForm({
   const [visible, setVisible] = useState(false);
   const token = useRef("");
   useEffect(() => {
+    const first = Object.keys(errors)[0];
+    if (first) document.getElementById(first)?.focus();
+  }, [errors]);
+  useEffect(() => {
     if (mode === "reset-password") {
       const fragment = new URLSearchParams(window.location.hash.slice(1));
       if (fragment.has("token")) token.current = fragment.get("token") ?? "";
@@ -54,10 +61,10 @@ export function AuthForm({
   }, [mode]);
   useEffect(() => {
     if (account && (mode === "login" || mode === "register")) {
-      router.replace("/");
+      router.replace(safeReturnTo(returnTo));
       router.refresh();
     }
-  }, [account, mode, router]);
+  }, [account, mode, router, returnTo]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     const found = validateAuth(mode, values);
@@ -80,7 +87,7 @@ export function AuthForm({
         });
         if (!user) throw new Error("Missing account");
         accept(user);
-        router.replace("/");
+        router.replace(safeReturnTo(returnTo));
         router.refresh();
       } else {
         await authClient().submit(

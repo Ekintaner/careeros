@@ -1,8 +1,20 @@
 import { StrictMode } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthForm } from "./auth-form";
-import { AccountMenu, AuthGate, AuthProvider, useAuth } from "./auth-provider";
+import {
+  AccountMenu,
+  AuthGate,
+  AuthProvider,
+  SessionRecovery,
+  useAuth,
+} from "./auth-provider";
 import { ApiError } from "@/lib/api-client";
 const mocks = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -24,6 +36,7 @@ const account = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  window.history.replaceState(null, "", "/");
   mocks.request.mockRejectedValue(new ApiError(401, {}));
 });
 function renderForm(
@@ -36,6 +49,83 @@ function renderForm(
   );
 }
 describe("account forms and state", () => {
+  it("does not restore a stale account lookup after the session expires", async () => {
+    let resolve: (value: typeof account) => void = () => {};
+    mocks.request.mockImplementation(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    render(
+      <AuthProvider>
+        <AuthGate>Private workspace</AuthGate>
+      </AuthProvider>,
+    );
+    act(() => {
+      mocks.setOnExpired.mock.calls[0]![0]();
+    });
+    await act(async () => {
+      resolve(account);
+    });
+    expect(screen.queryByText("Private workspace")).not.toBeInTheDocument();
+    expect(mocks.replace).toHaveBeenCalledWith("/login");
+  });
+  it("returns a recovered session to the requested detail and query", async () => {
+    mocks.request.mockResolvedValue(account);
+    render(
+      <AuthProvider>
+        <SessionRecovery returnTo="/interviews/owned?view=all" />
+      </AuthProvider>,
+    );
+    await waitFor(() =>
+      expect(mocks.replace).toHaveBeenCalledWith("/interviews/owned?view=all"),
+    );
+  });
+  it("preserves the destination when refresh fails and after login succeeds", async () => {
+    const target = "/jobs/owned?view=details#notes";
+    const view = render(
+      <AuthProvider>
+        <SessionRecovery returnTo={target} />
+      </AuthProvider>,
+    );
+    await waitFor(() =>
+      expect(mocks.replace).toHaveBeenCalledWith(
+        `/login?returnTo=${encodeURIComponent(target)}`,
+      ),
+    );
+    view.unmount();
+    mocks.submit.mockResolvedValue(account);
+    render(
+      <AuthProvider>
+        <AuthForm mode="login" returnTo={target} />
+      </AuthProvider>,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled(),
+    );
+    fireEvent.change(screen.getByLabelText("Email address"), {
+      target: { value: "person@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "test password" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith(target));
+  });
+  it("retains the current route when a mounted workspace expires", async () => {
+    window.history.replaceState(null, "", "/tasks/owned?view=open#details");
+    render(
+      <AuthProvider>
+        <AuthGate>Private workspace</AuthGate>
+      </AuthProvider>,
+    );
+    await waitFor(() =>
+      expect(mocks.replace).toHaveBeenCalledWith(
+        "/login?returnTo=%2Ftasks%2Fowned%3Fview%3Dopen%23details",
+      ),
+    );
+  });
   it("clears the protected workspace and preserves password-change feedback on redirect", async () => {
     function PasswordChangedAction() {
       const auth = useAuth();
@@ -73,6 +163,7 @@ describe("account forms and state", () => {
       screen.getByText("Enter your password (up to 128 characters)."),
     ).toBeVisible();
     expect(mocks.submit).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Email address")).toHaveFocus();
   });
   it("validates registration length, name and confirmation", async () => {
     renderForm("register");

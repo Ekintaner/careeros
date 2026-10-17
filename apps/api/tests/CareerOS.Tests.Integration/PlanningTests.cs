@@ -12,7 +12,8 @@ public sealed class PlanningTests(PostgreSqlFixture fixture)
     private async Task<TestDatabase> Database() { var d = await fixture.CreateDatabaseAsync(); await using var db = d.Context(); await db.Database.MigrateAsync(); return d; }
     private static async Task<T> Read<T>(HttpResponseMessage r) { r.EnsureSuccessStatusCode(); return (await r.Content.ReadFromJsonAsync<T>())!; }
     private static async Task Register(Browser b, string email = "planning@example.com") => (await b.Send("register", new { email, password = "planning test passphrase", displayName = "Test person" })).EnsureSuccessStatusCode();
-    private static async Task<ApplicationView> Application(Browser b) {
+    private static async Task<ApplicationView> Application(Browser b)
+    {
         var c = await Read<CompanyView>(await b.Api("companies", HttpMethod.Post, new CompanyInput("Company")));
         var j = await Read<JobView>(await b.Api("jobs", HttpMethod.Post, new JobInput(c.Id, "Role")));
         return await Read<ApplicationView>(await b.Api("applications", HttpMethod.Post, new CreateApplicationInput(j.Id)));
@@ -73,7 +74,8 @@ public sealed class PlanningTests(PostgreSqlFixture fixture)
         Assert.Equal(HttpStatusCode.NotFound, (await a.Api("tasks", HttpMethod.Post, new TaskInput("Attack", ApplicationId: foreign.Id))).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"tasks/{task.Id}", HttpMethod.Put, new TaskInput("Attack", Version: task.Version))).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"tasks/{task.Id}?version={task.Version}", HttpMethod.Delete)).StatusCode);
-        foreach (var parent in new[] { interview.Id, ownInterview.Id }) {
+        foreach (var parent in new[] { interview.Id, ownInterview.Id })
+        {
             Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"interviews/{parent}/notes/{note.Id}", HttpMethod.Put, new NoteInput("Attack", note.Version))).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"interviews/{parent}/notes/{note.Id}?version={note.Version}", HttpMethod.Delete)).StatusCode);
         }
@@ -95,7 +97,8 @@ public sealed class PlanningTests(PostgreSqlFixture fixture)
         var paths = new[] { $"interviews/{x.Id}", $"tasks/{t.Id}", $"interviews/{x.Id}/notes/{n.Id}" };
         object[] first = [input with { Version = x.Version, Location = "A" }, new TaskInput("A", Version: t.Version), new NoteInput("A", n.Version)];
         object[] second = [input with { Version = x.Version, Location = "B" }, new TaskInput("B", Version: t.Version), new NoteInput("B", n.Version)];
-        for (var i = 0; i < paths.Length; i++) {
+        for (var i = 0; i < paths.Length; i++)
+        {
             var results = await System.Threading.Tasks.Task.WhenAll(b.Api(paths[i], HttpMethod.Put, first[i]), b.Api(paths[i], HttpMethod.Put, second[i]));
             Assert.Single(results, r => r.StatusCode == HttpStatusCode.OK); Assert.Single(results, r => r.StatusCode == HttpStatusCode.Conflict);
         }

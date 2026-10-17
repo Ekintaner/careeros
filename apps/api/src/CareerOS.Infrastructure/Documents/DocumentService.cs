@@ -23,9 +23,9 @@ public sealed class DocumentService(CareerOSDbContext db, OwnedData owned, ICurr
         public Resume? Resume { get; init; }
     }
     private IQueryable<Row> Rows() => from d in owned.Query<Document>().AsNoTracking()
-        join r in owned.Query<Resume>().AsNoTracking() on d.Id equals r.DocumentId into resumes
-        from r in resumes.DefaultIfEmpty()
-        select new Row { Document = d, Resume = r };
+                                      join r in owned.Query<Resume>().AsNoTracking() on d.Id equals r.DocumentId into resumes
+                                      from r in resumes.DefaultIfEmpty()
+                                      select new Row { Document = d, Resume = r };
     private IQueryable<DocumentView> Views(IQueryable<Row> rows)
     {
         var applications = owned.Query<JobApplication>();

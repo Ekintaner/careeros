@@ -1,0 +1,150 @@
+{
+  "measuredAtUtc": "2026-10-17T13:34:15.6113945+00:00",
+  "scope": "In-process service \u002B real PostgreSQL; sequential warm requests; no HTTP/rendering/auth; 10 samples, no latency pass threshold",
+  "samples": [
+    {
+      "workload": "dashboard",
+      "recordsPerOwner": 100,
+      "owners": 2,
+      "samplesMs": [
+        34.3167, 35.9629, 39.763, 49.3142, 57.3369, 52.1887, 59.8204, 59.326,
+        61.1847, 61.538
+      ],
+      "queryCounts": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+      "medianMs": 54.7628,
+      "p95NearestRankMs": 61.538
+    },
+    {
+      "workload": "analytics",
+      "recordsPerOwner": 100,
+      "owners": 2,
+      "samplesMs": [
+        79.8924, 75.6693, 73.9506, 84.6416, 74.9904, 73.5198, 90.4503, 73.9904,
+        73.3098, 72.2222
+      ],
+      "queryCounts": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+      "medianMs": 74.4904,
+      "p95NearestRankMs": 90.4503
+    },
+    {
+      "workload": "skills-intelligence",
+      "recordsPerOwner": 100,
+      "owners": 2,
+      "samplesMs": [
+        104.3976, 51.2363, 49.7952, 48.8984, 57.7184, 55.5493, 47.4798, 44.9194,
+        45.672, 52.724
+      ],
+      "queryCounts": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      "medianMs": 50.51575,
+      "p95NearestRankMs": 104.3976
+    },
+    {
+      "workload": "tasks-first-page",
+      "recordsPerOwner": 100,
+      "owners": 2,
+      "samplesMs": [
+        45.3518, 50.0096, 78.8372, 56.5711, 48.1832, 56.1913, 46.8516, 45.3166,
+        60.9049, 44.0539
+      ],
+      "queryCounts": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      "medianMs": 49.0964,
+      "p95NearestRankMs": 78.8372
+    },
+    {
+      "workload": "dashboard",
+      "recordsPerOwner": 1000,
+      "owners": 2,
+      "samplesMs": [
+        66.903, 83.865, 79.5387, 127.288, 73.4626, 54.1422, 112.8176, 71.3237,
+        113.6233, 54.4326
+      ],
+      "queryCounts": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+      "medianMs": 76.50065000000001,
+      "p95NearestRankMs": 127.288
+    },
+    {
+      "workload": "analytics",
+      "recordsPerOwner": 1000,
+      "owners": 2,
+      "samplesMs": [
+        96.118, 73.3986, 101.7191, 92.9687, 149.7835, 91.3816, 71.9607, 76.702,
+        114.8803, 75.3439
+      ],
+      "queryCounts": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+      "medianMs": 92.17515,
+      "p95NearestRankMs": 149.7835
+    },
+    {
+      "workload": "skills-intelligence",
+      "recordsPerOwner": 1000,
+      "owners": 2,
+      "samplesMs": [
+        60.7189, 58.9927, 52.8846, 49.019, 54.0846, 78.4368, 52.7036, 42.1838,
+        45.9497, 62.8128
+      ],
+      "queryCounts": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      "medianMs": 53.4846,
+      "p95NearestRankMs": 78.4368
+    },
+    {
+      "workload": "tasks-first-page",
+      "recordsPerOwner": 1000,
+      "owners": 2,
+      "samplesMs": [
+        44.2328, 37.1693, 31.5457, 39.297, 49.963, 31.6378, 33.4409, 33.2935,
+        34.2086, 38.0225
+      ],
+      "queryCounts": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      "medianMs": 35.68895,
+      "p95NearestRankMs": 49.963
+    },
+    {
+      "workload": "dashboard",
+      "recordsPerOwner": 5000,
+      "owners": 2,
+      "samplesMs": [
+        44.9007, 45.7635, 44.7713, 45.244, 44.8693, 45.8909, 44.8496, 45.5496,
+        45.7716, 48.6393
+      ],
+      "queryCounts": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+      "medianMs": 45.3968,
+      "p95NearestRankMs": 48.6393
+    },
+    {
+      "workload": "analytics",
+      "recordsPerOwner": 5000,
+      "owners": 2,
+      "samplesMs": [
+        114.2491, 118.6139, 112.3986, 108.8548, 111.4283, 111.8656, 112.0406,
+        114.6964, 113.5092, 113.1375
+      ],
+      "queryCounts": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+      "medianMs": 112.76805,
+      "p95NearestRankMs": 118.6139
+    },
+    {
+      "workload": "skills-intelligence",
+      "recordsPerOwner": 5000,
+      "owners": 2,
+      "samplesMs": [
+        66.3218, 66.0238, 67.4586, 64.5788, 66.3207, 64.8054, 67.2725, 69.448,
+        86.3244, 73.1905
+      ],
+      "queryCounts": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+      "medianMs": 66.79714999999999,
+      "p95NearestRankMs": 86.3244
+    },
+    {
+      "workload": "tasks-first-page",
+      "recordsPerOwner": 5000,
+      "owners": 2,
+      "samplesMs": [
+        31.0265, 32.3898, 31.0935, 29.8632, 30.602, 30.2745, 31.0093, 30.819,
+        30.7065, 31.4005
+      ],
+      "queryCounts": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+      "medianMs": 30.91415,
+      "p95NearestRankMs": 32.3898
+    }
+  ]
+}

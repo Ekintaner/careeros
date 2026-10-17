@@ -16,8 +16,10 @@ public sealed class AnalyticsService(CareerOSDbContext db, OwnedData owned, ICur
         var apps = owned.Query<JobApplication>().Where(x => x.CreatedAtUtc >= start && x.CreatedAtUtc < end);
         var history = owned.Query<ApplicationStatusHistory>();
         var interviews = owned.Query<Interview>();
-        var summary = await apps.GroupBy(x => 1).Select(g => new {
-            Total = g.Count(), Applied = g.Count(x => x.AppliedAtUtc != null),
+        var summary = await apps.GroupBy(x => 1).Select(g => new
+        {
+            Total = g.Count(),
+            Applied = g.Count(x => x.AppliedAtUtc != null),
             Interviewed = g.Count(x => x.AppliedAtUtc != null && (history.Any(h => h.ApplicationId == x.Id && h.ToStatus == ApplicationStatus.Interview) || interviews.Any(i => i.ApplicationId == x.Id))),
             Offered = g.Count(x => x.AppliedAtUtc != null && history.Any(h => h.ApplicationId == x.Id && h.ToStatus == ApplicationStatus.Offer))
         }).SingleOrDefaultAsync(ct);

@@ -1,0 +1,38 @@
+{
+  "beforeDebug": [
+    {
+      "skills": 10,
+      "commands": 24,
+      "elapsedMs": 274.7309
+    },
+    {
+      "skills": 100,
+      "commands": 204,
+      "elapsedMs": 328.2071
+    }
+  ],
+  "afterDebug": [
+    {
+      "skills": 10,
+      "commands": 6,
+      "elapsedMs": 58.2595
+    },
+    {
+      "skills": 100,
+      "commands": 6,
+      "elapsedMs": 71.7358
+    }
+  ],
+  "finalRelease": [
+    {
+      "skills": 10,
+      "commands": 6,
+      "elapsedMs": 54.9905
+    },
+    {
+      "skills": 100,
+      "commands": 6,
+      "elapsedMs": 63.5394
+    }
+  ]
+}

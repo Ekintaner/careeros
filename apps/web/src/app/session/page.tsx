@@ -1,4 +1,8 @@
 import { SessionRecovery } from "@/features/auth/auth-provider";
-export default function SessionPage() {
-  return <SessionRecovery />;
+export default async function SessionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
+  return <SessionRecovery returnTo={(await searchParams).returnTo} />;
 }

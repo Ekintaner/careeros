@@ -14,7 +14,8 @@ public sealed record AnalyticsQuery(DateOnly? From = null, DateOnly? To = null, 
         var start = From ?? end.AddDays(-89);
         if (Interval is not ("week" or "month") || start > end || end.DayNumber - start.DayNumber > 731 || start.Year < 1900 || end.Year >= 9999)
             throw new DomainValidationException("Choose an ordered date range of at most 732 days and week or month intervals.");
-        DateTime Utc(DateOnly d) {
+        DateTime Utc(DateOnly d)
+        {
             var local = d.ToDateTime(TimeOnly.MinValue);
             if (zone.IsInvalidTime(local) || zone.IsAmbiguousTime(local)) throw new DomainValidationException("A date boundary is ambiguous or missing in this time zone. Choose another boundary.");
             return TimeZoneInfo.ConvertTimeToUtc(local, zone);

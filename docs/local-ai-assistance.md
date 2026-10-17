@@ -53,4 +53,4 @@ Input limits: saved description 1–10,000 characters; at most 100 profile skill
 
 Disabled status performs zero provider I/O. The assistance page explains optional setup and links to deterministic matching and Skills Intelligence; generation is disabled. No saved job description, no recorded resume/profile evidence, foreign/deleted IDs, invalid consent, oversize context, missing/unavailable server/model, cloud-enabled daemon, timeout, busy model and unverifiable output each have explicit states. Cancel and mode changes discard late responses. Saved records and all deterministic features remain usable regardless of AI failures. No cloud fallback or automatic paid purchase exists.
 
-No model-quality benchmark, semantic fact checker, PDF parsing, CV rewriting, output persistence/export or automatic application is claimed. CODEX-013 is not started.
+No model-quality benchmark, semantic fact checker, PDF parsing, CV rewriting, output persistence/export or automatic application is claimed. This contract remains in force for the final release.

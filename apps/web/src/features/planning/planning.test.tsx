@@ -70,6 +70,18 @@ beforeEach(() => {
     },
   );
 });
+it("describes the selected timezone to assistive technology for both date fields", async () => {
+  render(<PlanningEditor id="interview1" />);
+  const start = await screen.findByLabelText("Start");
+  fireEvent.change(screen.getByLabelText("Enter times in"), {
+    target: { value: "UTC" },
+  });
+  expect(start).toHaveAccessibleDescription(expect.stringContaining("UTC"));
+  expect(screen.getByLabelText("End")).toHaveAccessibleDescription(
+    expect.stringContaining("End must be after start"),
+  );
+  expect(start).toHaveValue("2026-10-18T09:00");
+});
 it("shows real task priority, application link, view filters and pagination", async () => {
   render(<PlanningList tasks />);
   expect(
@@ -79,7 +91,7 @@ it("shows real task priority, application link, view filters and pagination", as
   expect(
     screen.getByRole("link", { name: "View application" }),
   ).toHaveAttribute("href", "/applications/app1");
-  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Next" }));
   await waitFor(() =>
     expect(mocks.request).toHaveBeenCalledWith(
       expect.stringContaining("page=2"),
@@ -246,7 +258,7 @@ it("application picker pagination never submits the task form", async () => {
   fireEvent.change(screen.getByLabelText("Title"), {
     target: { value: "Follow up" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Next" }));
   await waitFor(() =>
     expect(mocks.request).toHaveBeenCalledWith(
       expect.stringContaining("applications?state=all&search=&page=2"),

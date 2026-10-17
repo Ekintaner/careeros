@@ -42,7 +42,7 @@ public sealed class MatchingTests(PostgreSqlFixture fixture)
         Assert.Equal(60m, profile.Result.Score); Assert.Equal("Profile", profile.Source); Assert.Single(profile.Result.Skills, s => s.Matched);
         var emptyResume = await Match(a, job.Id, resume.ResumeId);
         Assert.Equal(0m, emptyResume.Result.Score); Assert.Equal("Resume", emptyResume.Source); Assert.Empty(emptyResume.Resume!.Skills);
-        (await a.Api($"resumes/{resume.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(emptyResume.Resume.Version, ["sql"])) ).EnsureSuccessStatusCode();
+        (await a.Api($"resumes/{resume.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(emptyResume.Resume.Version, ["sql"]))).EnsureSuccessStatusCode();
         var evidenced = await Match(a, job.Id, resume.ResumeId);
         Assert.Equal(20m, evidenced.Result.Score); Assert.Equal("SQL", Assert.Single(evidenced.Result.Skills, s => s.Matched).Name);
         Assert.Equal(60m, (await Match(a, job.Id)).Result.Score);
@@ -71,7 +71,7 @@ public sealed class MatchingTests(PostgreSqlFixture fixture)
         }
         Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"jobs/{ja.Id}/matching?resumeId={rb.ResumeId}")).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await b.Api($"jobs/{ja.Id}/skills", HttpMethod.Put, new JobSkillsInput(ja.Version, [new("Private", "Required")]))).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await b.Api($"resumes/{ra.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(ma.Resume!.Version, ["Private"])) ).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await b.Api($"resumes/{ra.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(ma.Resume!.Version, ["Private"]))).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await a.Api($"jobs/{ja.Id}/skills", HttpMethod.Put, new JobSkillsInput(ja.Version, []), csrf: false)).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await anon.Api($"jobs/{ja.Id}/skills", HttpMethod.Put, new JobSkillsInput(ja.Version, []))).StatusCode);
         (await a.Api($"jobs/{ja.Id}/skills", HttpMethod.Put, new JobSkillsInput(ja.Version, [new("SQL", "Required")]))).EnsureSuccessStatusCode();
@@ -90,7 +90,7 @@ public sealed class MatchingTests(PostgreSqlFixture fixture)
         foreach (var body in new object[] { new { version = j.Version, skills = new[] { new { name = "SQL", requirementLevel = "1" } } }, new { version = j.Version, skills = new[] { new { name = "SQL", requirementLevel = "Required" } }, userId = Guid.NewGuid() }, new { version = j.Version, skills = (object?)null } })
             Assert.Equal(HttpStatusCode.BadRequest, (await a.Api($"jobs/{j.Id}/skills", HttpMethod.Put, body)).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, (await a.Api($"jobs/{j.Id}/matching?resumeId=invalid")).StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, (await a.Api($"resumes/{r.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(initial.Resume!.Version, ["SQL", "sql"])) ).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await a.Api($"resumes/{r.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(initial.Resume!.Version, ["SQL", "sql"]))).StatusCode);
         var writes = await Task.WhenAll(a.Api($"jobs/{j.Id}/skills", HttpMethod.Put, new JobSkillsInput(j.Version, [new("SQL", "Required")])), a.Api($"jobs/{j.Id}/skills", HttpMethod.Put, new JobSkillsInput(j.Version, [new("C#", "Required")])));
         Assert.Single(writes, x => x.StatusCode == HttpStatusCode.NoContent); Assert.Single(writes, x => x.StatusCode == HttpStatusCode.Conflict);
         var latest = await Match(a, j.Id, r.ResumeId); Assert.Single(latest.Result.Skills);
@@ -133,7 +133,7 @@ public sealed class MatchingTests(PostgreSqlFixture fixture)
         for (var attempt = 0; attempt < 3; attempt++)
         {
             var document = await Resume(a); var original = await Match(a, job.Id, document.ResumeId);
-            (await a.Api($"resumes/{document.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(original.Resume!.Version, ["SQL"])) ).EnsureSuccessStatusCode();
+            (await a.Api($"resumes/{document.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(original.Resume!.Version, ["SQL"]))).EnsureSuccessStatusCode();
             var latest = await Match(a, job.Id, document.ResumeId);
             var responses = await Task.WhenAll(a.Api($"resumes/{document.ResumeId}/skills", HttpMethod.Put, new ResumeSkillsInput(latest.Resume!.Version, ["C#"])), a.Api($"documents/{document.Id}", HttpMethod.Delete));
             Assert.Contains(responses[0].StatusCode, new[] { HttpStatusCode.NoContent, HttpStatusCode.NotFound });
@@ -141,4 +141,25 @@ public sealed class MatchingTests(PostgreSqlFixture fixture)
             Assert.Equal(HttpStatusCode.NotFound, (await a.Api($"resumes/{document.ResumeId}/skills")).StatusCode);
         }
         await using var final = d.Context(); Assert.Empty(await final.ResumeSkills.ToArrayAsync()); Assert.Empty(await final.Resumes.ToArrayAsync());
-    }    private sealed record Current(Guid UserId) : ICurrentUser;}
+    }
+    [PostgreSqlFact]
+    public async Task ConcurrentBatchesShareCanonicalNamesWithoutLeakingEvidenceOrExecutingText()
+    {
+        await using var d = await fixture.CreateDatabaseAsync(); await using (var db = d.Context()) await db.Database.MigrateAsync();
+        using var h = new AuthFactory(d.ConnectionString); using var a = h.Browser(); using var b = h.Browser();
+        await Register(a, "batch-a@example.com"); await Register(b, "batch-b@example.com");
+        var ja = await Job(a); var jb = await Job(b);
+        var names = Enumerable.Range(0, 99).Select(i => $"Shared batch {i:D3}").Append("SQL'); DROP TABLE skills; --").ToArray();
+        var results = await Task.WhenAll(
+            a.Api($"jobs/{ja.Id}/skills", HttpMethod.Put, new JobSkillsInput(ja.Version, names.Select(n => new RequirementInput(n, "Required")).ToArray())),
+            b.Api($"jobs/{jb.Id}/skills", HttpMethod.Put, new JobSkillsInput(jb.Version, names.Reverse().Select(n => new RequirementInput(n.ToLowerInvariant(), "Preferred")).ToArray())));
+        Assert.All(results, result => Assert.Equal(HttpStatusCode.NoContent, result.StatusCode));
+        var ma = await Match(a, ja.Id); var mb = await Match(b, jb.Id);
+        Assert.Equal(100, ma.Result.Skills.Length); Assert.Equal(100, mb.Result.Skills.Length);
+        Assert.All(ma.Result.Skills, row => { Assert.Equal("Required", row.RequirementLevel); Assert.False(row.Matched); });
+        Assert.All(mb.Result.Skills, row => { Assert.Equal("Preferred", row.RequirementLevel); Assert.False(row.Matched); });
+        await using var verify = d.Context(); Assert.Equal(100, await verify.Skills.CountAsync()); Assert.Equal(200, await verify.JobSkills.CountAsync());
+        Assert.Empty(await verify.UserSkills.ToArrayAsync()); Assert.Empty(await verify.ResumeSkills.ToArrayAsync());
+    }
+    private sealed record Current(Guid UserId) : ICurrentUser;
+}

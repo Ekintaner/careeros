@@ -1,155 +1,143 @@
 # CareerOS
 
-CareerOS is a full-stack job search operating system for managing applications, resumes, interviews, skills, analytics and career intelligence.
+[![CI](https://github.com/Ekintaner/careeros/actions/workflows/ci.yml/badge.svg)](https://github.com/Ekintaner/careeros/actions/workflows/ci.yml)
 
-## Overview
+A private, self-hostable workspace connecting opportunities, applications, resumes, skill evidence, interviews and follow-ups. No paid API or mandatory cloud service.
 
-A focused workspace for making a job search easier to understand and manage. This repository contains **CODEX-001: Project Foundation & Architecture**, **CODEX-002: Core Domain & PostgreSQL Data Architecture**, **CODEX-003: Authentication, Security & Data Ownership**, **CODEX-004: Career Profile, Skills & Account Settings**, and **CODEX-005: Companies & Job Opportunities**.
+**Final release scope: CODEX-001–015.** Local self-hosting is the delivery path. No public deployment or production certification is claimed. See [final verification](docs/verification-codex015.md) for results and limitations.
 
-## Product Vision
+## Features
 
-Connect opportunities, application progress, career documents and actionable insights without losing the context behind each career decision.
+- Career profile, preferences and explicit skill evidence.
+- Companies and opportunities with search, filtering and archive/restore.
+- Application pipeline, stage history, private notes and resume assignment.
+- Private PDF documents/resumes and primary resume selection.
+- Deterministic weighted matching with explained matched/missing evidence.
+- Skills intelligence and learning priorities from saved opportunities.
+- Interviews with local/UTC date entry, private notes, tasks and due dates.
+- Owner-scoped Overview and analytics with time-zone filters.
+- Cookie authentication, rotating refresh sessions, CSRF and optimistic concurrency.
+- Optional consent-based local Ollama assistance, **disabled by default**.
 
-## Current Status
+No automatic applications, job scraping, PDF parsing, email delivery, calendar invitations or push notifications are implemented. Password recovery fails safely until a delivery adapter is installed.
 
-**Implemented:** responsive application shell, honest empty Overview, disabled future navigation, typed API client, ASP.NET API host, structured request logging, error handling, health checks, EF Core/PostgreSQL and Redis connectivity, 17 domain/persistence entities, an initial PostgreSQL schema migration, ownership constraints, auditable timestamps, optimistic concurrency, development infrastructure, tests and CI.
+## Architecture and stack
 
-**Implemented in CODEX-003:** registration/login/recovery pages, protected workspace, JWT access cookies, rotating refresh sessions, replay detection, logout/all, password change/reset, current-user ownership boundary, rate limits and CSRF protection. See [authentication](docs/authentication.md).
-
-**Implemented in CODEX-004:** authenticated `/profile` and `/settings`, persistent career information/job preferences, canonical skill search and owned skill management, display-name editing and password-change UI. See [profile architecture](docs/profile.md).
-
-**Implemented in CODEX-005:** owner-scoped company and job CRUD, bounded search/filter/sort lists, job detail, archive/restore and concurrency-safe restrictive deletion. See [companies and jobs](docs/companies-and-jobs.md).
-
-**Implemented in CODEX-007:** authenticated owner-scoped PDF documents and resumes, local private storage, downloads, restricted deletion, primary resume selection and application assignment. See [documents and resumes](docs/documents-and-resumes.md).
-
-**Implemented in CODEX-008:** deterministic job versus career profile or confirmed resume skill matching, weighted score breakdown, matched/missing evidence, and manual job/resume skill editors. See [matching rules and limits](docs/resume-job-matching.md).
-
-**Implemented in CODEX-010:** owner-scoped interview scheduling/details/notes, application-linked or standalone tasks, due dates, priorities, completion/reopening and upcoming/overdue views. See [contracts and limitations](docs/interviews-and-tasks.md).
-
-**Implemented in CODEX-009:** current saved-job skill demand, distinct profile/resume evidence gaps, explained learning priorities, paginated job drilldowns and responsive Skills intelligence. See [rules and limitations](docs/skills-intelligence.md).
-
-**Planned:** interviews, tasks and notifications; parsing, analytics and optional AI assistance. These future tools remain disabled. Production email delivery is not configured and recovery fails safely until an adapter is installed. No records are seeded automatically.
-
-## Zero-cost requirement
-
-CareerOS must remain fully usable by a single personal user without requiring a paid API, paid AI provider, paid database, paid Redis provider, paid storage provider, paid email provider, paid domain, or mandatory paid hosting service. Prefer open-source, local/self-hostable, or genuinely usable free solutions. Any paid integration must be optional, disabled by default, and must not be necessary for core functionality. Mandatory usage-metered SaaS is excluded. CODEX-004/005 add no dependency or cloud service.
-
-## Technology Stack
-
-- Node.js 24, npm workspaces, Next.js 16.3.5 App Router, React 19.3, TypeScript, Tailwind CSS 4.
-- ASP.NET Core / .NET 8, EF Core 8, Npgsql, StackExchange.Redis, Swashbuckle OpenAPI.
-- PostgreSQL 17 and Redis 7.4 through Docker Compose.
-- Vitest, Testing Library, xUnit, WebApplicationFactory and Testcontainers.
-
-.NET 8 matches the SDK installed for this phase. It reaches end of support on November 10, 2026; upgrade to .NET 10 LTS before production deployment. See the [Microsoft support policy](https://dotnet.microsoft.com/en-us/platform/support/policy).
-
-## Architecture
-
-One monorepo, two independently runnable applications. The backend uses pragmatic Clean Architecture: Domain ← Application ← Infrastructure, composed by Api. No repository wrapper, mediator or shared JavaScript package is added without a concrete need. See [architecture](docs/architecture.md) and the [database model](docs/database.md).
-
-## Repository Structure
-
-```text
-apps/
-  web/src/
-    app/                    App Router pages and root layout
-    components/layout/      Responsive shell and navigation
-    components/ui/          Shared icon primitive
-    lib/                    Typed HTTP client
-    styles/                 Design tokens and responsive styling
-    test/                   Test setup
-  api/
-    CareerOS.sln
-    src/
-      CareerOS.Domain/
-      CareerOS.Application/
-      CareerOS.Infrastructure/
-      CareerOS.Api/
-    tests/
-      CareerOS.Tests.Unit/
-      CareerOS.Tests.Integration/
-docs/                       Architecture, setup and verification notes
-infrastructure/             Development infrastructure guidance
-scripts/                    Cross-platform developer command guide
-.github/workflows/          CI
-.config/                    Local dotnet-ef tool manifest
-docker-compose.yml
+```mermaid
+flowchart LR
+  Browser --> Web[Next.js / same-origin API proxy]
+  Web --> API[ASP.NET Core API]
+  API --> PG[(PostgreSQL)]
+  API --> Redis[(Redis)]
+  API --> Files[Private PDF storage]
+  API -. optional consent .-> Ollama[Loopback Ollama / off by default]
 ```
 
-## Prerequisites
+Domain and Application contracts are implemented by Infrastructure and composed by Api. Owner-scoped queries and composite database constraints protect relationships. Redis is a readiness dependency; this diagram does not imply every operation is cached. Private files remain outside Git and the web root.
 
-Node.js 24 (see `.nvmrc`), npm 11, .NET SDK 8.0.425 (see `global.json`), and Docker Engine with Compose v2 for infrastructure and container tests. Docker is not required for frontend development or ordinary backend tests.
+| Area     | Technology                                                                        |
+| -------- | --------------------------------------------------------------------------------- |
+| Web      | Node 24, Next.js 16.3.8, React 19.3, TypeScript, Tailwind 4                       |
+| API      | .NET 8 / ASP.NET Core, EF Core 8, Npgsql                                          |
+| Data     | PostgreSQL 17, Redis 7.4, private local PDF storage                               |
+| Checks   | xUnit, PostgreSQL Testcontainers, Vitest/Testing Library, live HTTP/browser smoke |
+| Delivery | npm workspaces, Docker Compose infrastructure, GitHub Actions                     |
 
-## Local Development
+.NET 8 reaches end of support on **10 November 2026**. Upgrade to a supported LTS before public production use; see [Microsoft's notice](https://devblogs.microsoft.com/dotnet/dotnet-8-9-end-of-support/).
 
-See [development guide](docs/development.md) for complete PowerShell and POSIX commands.
+## Windows quickstart with Docker
 
-1. `npm ci`
-2. Copy `.env.example` to a local `.env`, choose a local database password, then `docker compose up -d --wait`.
-3. Configure API connection strings using environment variables or .NET user-secrets as documented below.
-4. `dotnet restore apps/api/CareerOS.sln --locked-mode`
-5. `dotnet run --project apps/api/src/CareerOS.Api` (API: `http://localhost:5080`).
-6. Copy `apps/web/.env.example` to `apps/web/.env.local`, then `npm run dev` (web: `http://localhost:3000`).
+Use PowerShell 7. Install Node 24/npm 11, the .NET SDK in `global.json`, Git and Docker Desktop with Linux containers. Run from the repository root. Compose runs **PostgreSQL and Redis**; API and web run on the host. No full application container image is supplied.
 
-## Environment Configuration
+```powershell
+npm ci
+dotnet restore apps/api/CareerOS.sln --locked-mode
+dotnet tool restore
+Copy-Item .env.example .env
+# Edit .env and choose a private POSTGRES_PASSWORD before starting.
+docker compose up -d --wait
+```
 
-The root `.env` is consumed by **Docker Compose only**. ASP.NET reads `ConnectionStrings__PostgreSql`, `ConnectionStrings__Redis`, and normal .NET configuration sources. For local credentials prefer `dotnet user-secrets`. Next.js reads server-only `API_INTERNAL_URL` from `apps/web/.env.local` for its same-origin API rewrite and server account checks. No backend secret belongs in a NEXT_PUBLIC variable. Authentication additionally requires issuer, audience, a configured signing key and explicit frontend origins; see [setup](docs/development.md).
+The root `.env` is read by Compose only. Configure ASP.NET separately, using the chosen password and actual port:
 
-The API fails startup when required connection strings are absent or malformed. Unreachable configured dependencies do not prevent liveness; readiness reports failure. Credentialed CORS/CSRF allow explicitly configured origins; Development defaults to `http://localhost:3000`. Override `Cors__AllowedOrigins__0` if needed. Configure `AllowedHosts` and an explicit production HTTPS/reverse-proxy policy before deployment; there is no production deployment configuration in this phase.
+```powershell
+dotnet user-secrets set 'ConnectionStrings:PostgreSql' 'Host=localhost;Port=5432;Database=careeros;Username=careeros;Password=<your-local-password>' --project apps/api/src/CareerOS.Api
+dotnet user-secrets set 'ConnectionStrings:Redis' 'localhost:6379' --project apps/api/src/CareerOS.Api
+dotnet user-secrets set 'Auth:Issuer' 'careeros-local' --project apps/api/src/CareerOS.Api
+dotnet user-secrets set 'Auth:Audience' 'careeros-web' --project apps/api/src/CareerOS.Api
+$signingKey = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+dotnet user-secrets set 'Auth:SigningKey' $signingKey --project apps/api/src/CareerOS.Api
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet ef database update --project apps/api/src/CareerOS.Infrastructure --startup-project apps/api/src/CareerOS.Api
+dotnet run --project apps/api/src/CareerOS.Api
+```
 
-## Docker
+In a second terminal:
 
-`docker compose up -d --wait` starts local PostgreSQL and Redis with health checks and persistent named volumes. Ports bind only to loopback. `docker compose down` retains data. See [infrastructure notes](infrastructure/README.md). Never reuse local development credentials in production.
+```powershell
+Copy-Item apps/web/.env.example apps/web/.env.local
+npm run dev
+```
 
-## Frontend
+Open [CareerOS](http://localhost:3000) and register your own account. No seed/default credentials exist. API [readiness](http://localhost:5080/health) and Development [Swagger](http://localhost:5080/swagger) are local URLs. Full commands, POSIX equivalents and configuration: [development guide](docs/development.md).
 
-`npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. To serve a production build locally: `npm run start --workspace apps/web`.
+For an optimized local preview, stop web development, run `npm run build`, then `npm run start --workspace apps/web`. This does not harden the Development API for public hosting.
 
-The shell uses semantic navigation, focus indicators, a skip link and a native mobile disclosure menu. Future navigation is disabled and does not simulate working features. Feature folders and libraries such as TanStack Query, React Hook Form and Zod will be introduced with their first real consumer.
+## Configuration, privacy and operations
 
-## Backend
+- [Configuration template](.env.example): Compose values and API setting names. Never commit real secrets. Web uses server-only `API_INTERNAL_URL` in `apps/web/.env.local`.
+- [Release operations](docs/release-operations.md): clean install, migrations, paired backup/restore, upgrade/recovery and deployment choices.
+- [Security review](docs/security-codex014.md) and [final audit](docs/verification-codex015.md): authentication, uploads, AI and operational limits.
+- [Optional local Ollama](docs/local-ai-assistance.md): explicit enablement, cloud-disabled preflight and hardware caveats. No automatic model download.
 
-`dotnet run --project apps/api/src/CareerOS.Api`. Development OpenAPI JSON is at `/swagger/v1/swagger.json` and Swagger UI at `/swagger`. `/health/live` checks the running host; `/health` actually probes PostgreSQL and Redis and returns 503 if unavailable. Neither endpoint exposes connection strings or exception details. `X-Correlation-ID` is validated and returned with responses, and appears in structured JSON logs and ProblemDetails.
+Data lives in PostgreSQL and the API account's private PDF root. No analytics/AI SaaS or external job provider is required. Installation and optional model downloads need internet. Browsers/extensions, external links, administrators and an optional daemon have separate privacy boundaries. Use dedicated OS permissions; PDF signature checks are not malware scanning. Protect backups as sensitive data.
 
-HTTP product endpoints use `/api/v1/...`; health endpoints remain unversioned. The generated `InitialDomainSchema`, `AuthenticationFoundation`, `CareerProfilePreferences`, and `CompanyAndJobLifecycle` migrations define the schema. Apply them explicitly; API startup does not migrate or seed databases. See the migration workflow in [development](docs/development.md).
+**Zero mandatory financial cost:** no paid API, database, domain, model or hosting subscription is required. Existing hardware, electricity and internet remain operator costs. No cloud resources are provisioned.
 
-## Testing
+## Verification
 
-```sh
+```powershell
+npm run format:check
+npm run lint
+npm run typecheck
 npm test
-dotnet test apps/api/CareerOS.sln
+npm run build
+npm audit --omit=dev --audit-level=high
+npm audit
+dotnet format apps/api/CareerOS.sln --verify-no-changes --no-restore
+dotnet build apps/api/CareerOS.sln -c Release --no-restore
+$env:RUN_CONTAINER_TESTS = 'true'
+dotnet test apps/api/CareerOS.sln -c Release --no-build
+docker compose --env-file .env.example config --quiet
+$env:CAREEROS_PREVIEW_URL = 'http://localhost:3000'
+node --test scripts/http-hardening-checks.mjs
 ```
 
-The default backend suite tests domain invariants, real HTTP pipeline behavior in-process and intentionally unavailable dependencies. Set `RUN_CONTAINER_TESTS=true` with Docker running to enable real PostgreSQL migration/constraint/concurrency tests; otherwise they are visibly skipped. CI enables them and fails if containers cannot run. A disposable PostgreSQL server can also be supplied through `CAREEROS_TEST_POSTGRES`; see [development](docs/development.md).
+PostgreSQL tests use disposable containers/databases, not the development volume. Without opt-in they visibly skip; skips are not full coverage. See [test setup](docs/development.md#testing) and [synthetic performance methodology](docs/performance-codex014.md). Timings are local service/database measurements, not browser latency, real users or an SLA.
 
-## CI
+CI has separate **web**, **api** and **compose** jobs, read-only permissions and no deployment step. Use the final report's exact commit/run for release evidence.
 
-Pushes to `main` and pull requests run frontend installation, formatting, lint, type checks, tests and production build; backend locked restore, Release build and tests; and Compose validation. CI has read-only repository permissions and no deployment step.
+## Troubleshooting
 
-## Roadmap
+| Symptom                             | Action                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Port conflict                       | Change matching ports/origins together; preserve existing volumes.                                      |
+| Password failure after editing .env | Initialization variables affect new volumes only. Recover the correct credential; do not delete data.   |
+| API configuration failure           | Supply connection strings, issuer, audience and random signing key. Compose .env alone is insufficient. |
+| Readiness 503                       | Check PostgreSQL/Redis health, host ports and credentials.                                              |
+| Windows build/install lock          | Stop this project's API/web process before rebuilding or npm ci, then restart.                          |
+| Login/CSRF/routing failure          | Check exact frontend origin and API_INTERNAL_URL; restart/rebuild after changes.                        |
+| Missing files after restore         | Restore database and private PDF root from the same backup pair.                                        |
+| AI unavailable                      | Check optional preflight requirements; core features remain available.                                  |
 
-1. CODEX-001 — foundation (complete).
-2. CODEX-002 — core domain and PostgreSQL schema (complete).
-3. CODEX-003 — authentication and server-enforced ownership (complete; production delivery/deployment remain separate).
-4. CODEX-004 — career profile, skills and account settings (complete).
-5. CODEX-005 — companies and opportunities (complete).
-6. CODEX-006 — application tracking, pipeline and status history (complete).
-7. CODEX-007 — resume and document management (complete).
-8. CODEX-008 — deterministic resume/job skill matching (complete).
-9. CODEX-009 — skills intelligence and skill gap analytics (complete).
-10. CODEX-010 — interview scheduling, notes and career follow-up tasks (implemented locally; commit/push approval pending).
-11. Further phases, including interviews and follow-ups (not started).
+## Explore and present
+
+[Synthetic demo walkthrough](docs/demo-walkthrough.md) · [English/Turkish CV and LinkedIn text](docs/portfolio.md) · [Architecture](docs/architecture.md) · [Database](docs/database.md) · [Design system](docs/design-system.md)
+
+![CareerOS Overview — real local screenshot with synthetic verification data](docs/screenshots/overview.jpg)
+
+`apps/web` contains UI; `apps/api` the layered API and tests; `docs` contracts and verification; `scripts` smoke helpers; `.github/workflows` CI. Historical reports are point-in-time evidence.
 
 ## License
 
 [MIT](LICENSE).
-
-## Application tracking (CODEX-006)
-
-Track owned jobs as applications, manage a responsive pipeline, record status history and notes, attach existing resume metadata, and archive/restore without losing history. See [applications and pipeline](docs/applications-and-pipeline.md) and [CODEX-006 verification](docs/verification-codex006.md). No new dependency or paid service is required.
-
-CODEX-011: [Analytics and reporting](docs/analytics-and-reporting.md) is available at /analytics with date/time-zone filters, recorded conversion, trends, completed stage durations and planning metrics. No paid provider or new migration.
-
-CODEX-012 (local, awaiting submission approval): [Optional local AI assistance](docs/local-ai-assistance.md) from saved job details. Disabled by default; local-only Ollama verification, grounded excerpts and recorded-evidence suggestions. CareerOS retains zero mandatory financial cost without AI.
-
-CODEX-013 adds a real owner-scoped Overview and consistent responsive presentation. See [UI verification](docs/verification-codex013.md) and [design system](docs/design-system.md).

@@ -125,7 +125,7 @@ Commit npm and NuGet lockfiles. To intentionally update NuGet resolution, restor
 - **API URL missing:** set `apps/web/.env.local` and restart/rebuild Next.js.
 - **Restore blocked by network:** allow registry.npmjs.org and api.nuget.org, then retry; do not suppress restore errors.
 
-Authentication, career profile, skills, account settings and server ownership boundaries are implemented. Other product CRUD, production delivery and deployment remain deferred.
+Product CRUD, documents, matching, planning, analytics and optional local assistance are implemented. Public hosting and production recovery delivery remain operator work; see the final README and release operations.
 
 ## Profile/settings workflow (CODEX-004)
 

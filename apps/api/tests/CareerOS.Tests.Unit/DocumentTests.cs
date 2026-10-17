@@ -25,6 +25,15 @@ public sealed class DocumentTests
     [Fact]
     public async Task OversizeStreamRejected() => await Assert.ThrowsAsync<DocumentTooLargeException>(() => LocalDocumentStore.Validate(new MemoryStream(new byte[LocalDocumentStore.MaxBytes + 1]), "application/pdf", default));
     [Fact]
+    public async Task ExactLimitAcceptedAndCancelledUploadDoesNotContinueReading()
+    {
+        var bytes = Enumerable.Repeat((byte)' ', LocalDocumentStore.MaxBytes).ToArray();
+        "%PDF-1.7\n"u8.CopyTo(bytes); "\n%%EOF"u8.CopyTo(bytes.AsSpan(bytes.Length - 6));
+        Assert.Equal(bytes, await LocalDocumentStore.Validate(new MemoryStream(bytes), "application/pdf", default));
+        using var cancelled = new CancellationTokenSource(); cancelled.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => LocalDocumentStore.Validate(new MemoryStream(bytes), "application/pdf", cancelled.Token));
+    }
+    [Fact]
     public void UnsafeStorageLocationsRejected()
     {
         var root = Path.Combine(Path.GetTempPath(), "careeros-location-test-" + Guid.NewGuid().ToString("N"));
